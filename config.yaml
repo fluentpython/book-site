@@ -1,7 +1,7 @@
 baseURL: http://fluentpython.com/
 languageCode: en-us
 defaultContentLanguage: en
-title: Fluent Python—the lizard book
+title: Fluent Python, the lizard book
 theme: cupper
 #googleAnalytics: UA-123456789-1
 #disqusShortname: yourdiscussshortname
@@ -17,18 +17,18 @@ imaging:
   quality: 99
 
 params:
-  description: An accessibility-friendly Hugo theme, ported from the [original Cupper](https://github.com/ThePacielloGroup/cupper) project.
+  description: Companion site for the book [Fluent Python, Second Edition](https://www.oreilly.com/library/view/fluent-python-2nd/9781492056348/).
   homeMetaContent: An accessibility-friendly Hugo theme, ported from the original Cupper project.
-  footer: Made with [Hugo](https://gohugo.io/). Themed by [Cupper](https://github.com/zwbetz-gh/cupper-hugo-theme). Deployed to [Netlify](https://www.netlify.com/).
+  footer: Made with [Hugo](https://gohugo.io/). Themed by [Cupper](https://github.com/zwbetz-gh/cupper-hugo-theme).  # Deployed to [Netlify](https://www.netlify.com/).
   # For more date formats see https://gohugo.io/functions/format/
-  dateFormat: Jan 2, 2006
-  codePenUser: someUser
+  dateFormat: 2006-01-02
+  # codePenUser: someUser  # https://codepen.io/
   katex: true
   hideHeaderLinks: false
   search: true
   showThemeSwitcher: true
   moveFooterToHeader: false
-  logoAlt: "An alternative text description of the logo"
+  logoAlt: "Engraving of a Namaqua sand lizard (Pedioplanis namaquensis)"
   customCss:
     - css/custom_01.css
     - css/custom_02.css
@@ -41,7 +41,10 @@ menu:
     - name: Home
       url: /
       weight: 1
-    - name: Blog
+    - name: Extra content
+      url: /extra/
+      weight: 2
+    - name: Soapbox
       url: /post/
       weight: 2
     - name: Tags
@@ -84,3 +87,16 @@ markup:
   tableOfContents:
     endLevel: 6
     startLevel: 2
+  # AsciiDoc
+  asciidocExt:
+    attributes: {}
+    backend: html5
+    extensions: []
+    failureLevel: fatal
+    noHeaderOrFooter: true
+    preserveTOC: false
+    safeMode: unsafe
+    sectionNumbers: false
+    trace: false
+    verbose: false
+    workingFolderCurrent: false
