@@ -45,7 +45,7 @@ menu:
       url: /extra/
       weight: 2
     - name: Soapbox
-      url: /post/
+      url: /posts/
       weight: 2
     - name: Tags
       url: /tags/
