@@ -1,0 +1,22 @@
+<header class="intro-and-nav" role="banner">
+  <div>
+    <div class="intro">
+      <a
+        class="logo"
+        href="{{ .Site.BaseURL }}"
+        aria-label="{{ .Site.Title }} home page"
+      >
+        <img 
+          src="{{ "images/fluentpython-site-logo.png" | relURL }}" 
+          alt="{{ .Site.Params.logoAlt | default "Logo" }}">
+      </a>
+      <p class="library-desc">
+        {{ with .Site.Params.description }} {{ . | markdownify }} {{ end }}
+      </p>
+    </div>
+    {{ partial "nav.html" . }}
+    {{ if eq .Site.Params.moveFooterToHeader true }}
+      {{ partial "footer.html" . }}
+    {{ end }}
+  </div>
+</header>
