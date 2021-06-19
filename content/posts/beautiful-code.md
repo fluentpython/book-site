@@ -2,6 +2,9 @@
 title: "A Beautiful Piece of Code"
 date: 2021-06-17T17:52:48-03:00
 draft: false
+tags:
+- Lisp
+- interpreter
 ---
 
 > The big revelation to me when I was in graduate school [was] when I finally understood that the half page of code on the bottom of page 13 of the Lisp 1.5 manual was Lisp in itself. These were “Maxwell’s Equations of Software!” This is the whole world of programming in a few lines that I can put my hand over.

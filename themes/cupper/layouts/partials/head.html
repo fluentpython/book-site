@@ -11,8 +11,7 @@
       <meta name="description" content="{{ . | plainify }}">
     {{ end }}
   {{ else }}
-    {{ $summary := trim (.Summary | plainify | htmlUnescape) "\n\r"
-      | default .Title }}
+    {{ $summary := trim (.Summary | plainify | htmlUnescape) "\n\r" | default .Title }}
     <meta name="description" content="{{ $summary }}">
   {{ end }}
 
