@@ -12,7 +12,7 @@ tags:
 > — [_A Conversation with Alan Kay_](https://queue.acm.org/detail.cfm?id=1039523)
 
 
-**Lisp** and **Fortran** are the only programming languages from the 1950's that are still relevant in 2021. 
+**Lisp** and **Fortran** are the only programming languages from the 1950's that are still widely used in 2021. 
 
 **Lisp** has a simple core, but is powerful and malleable. Over the decades, several **Lisp** dialects emerged.
 
@@ -132,7 +132,45 @@ In the [post](https://norvig.com/lispy.html) where Peter Norvig presents **lis.p
 he describes a **Lispy Calculator**, a tiny subset of Scheme
 that allows computing arithmetic expressions and defining constants.
 
+The code of `calc.py` has two major functions: 
 
+* function `parse(source: str) -> Expression`
+* function `evaluate(exp: Expression) -> Any`
+
+They are used like this:
+
+```python
+>>> from calc import parse, evaluate
+>>> parse('(* 7 (+ 2 4))')
+['*', 7, ['+', 2, 4]]
+>>> evaluate(parse('(* 7 (+ 2 4))'))
+42
+```
+
+`parse` takes source code as a string, and returns an `Expression`
+built of Python objects:
+
+* `int` and `float` numbers;
+* `str` used as identifiers (_symbols_ in Lisp parlance);
+* lists of numbers, symbols, and nested lists;
+
+`evaluate` takes an `Expression` and returns its value,
+which may be of the above types and other types,
+such as function objects.
+
+The `calc` function wraps `parse` and `evaluate`::
+
+```python
+>>> calc('+')
+<built-in function add>
+>>> calc('(* 111 111)')
+12321
+```
+
+### The global environment
+
+and one data structure:
+* dictionary `global_environment`
 
 
 
