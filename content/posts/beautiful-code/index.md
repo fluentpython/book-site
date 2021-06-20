@@ -169,7 +169,6 @@ The `calc` function wraps `parse` and `evaluate`:
 
 ### The global environment
 
-
 To evaluate symbols like `+` and `abs`,
 the evaluator fetches values stored in 
 a `dict`, the `global_env`
@@ -207,6 +206,41 @@ calc>
 
 ```
 
+### The `evaluate` function
+
+`evaluate` is the most interesting part of the `calc.py`.
+
+In Python, it's best expressed as with a `match` statement:
+
+```python
+
+def evaluate(exp: Expression) -> Any:
+    "Evaluate an expression in an environment."
+    match exp:
+        case Symbol(var):                               # variable reference
+            return global_env[var]
+        case literal if not isinstance(exp, list):      # constant literal
+            return literal
+        case ['define', Symbol(var), value_exp]:        # (define var exp)
+            global_env[var] = evaluate(value_exp)
+        case [Symbol(op), *args]:                       # (proc arg...)
+            proc = evaluate(op)
+            values = (evaluate(arg) for arg in args)
+            return proc(*values)
+```
+
+Without going into details, the code expresses the four rules
+of evaluation for the calculator language.
+
+To evaluate an expression `exp`, match its pattern with the appropriate rule:
+
+
+| pattern                                         | how to evaluate                   |
+|-------------------------------------------------|-----------------------------------|
+| `exp` is a `Symbol`                             | look up its value in the `global_env` |
+| `exp` is a literal but not a list               | it's number a, the value is itself |
+| `exp` is a 3-item list starting with `'define'` | evaluate the `value_exp` and store the result in `global_env[var]`|
+| `exp` is a list with 1 or more items            | evaluate the first item to get a function, evaluate each argument, apply function to argument values |
 
 
 
