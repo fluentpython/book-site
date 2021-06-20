@@ -158,7 +158,7 @@ built of Python objects:
 which may be of the above types and other types,
 such as function objects.
 
-The `calc` function wraps `parse` and `evaluate`::
+The `calc` function wraps `parse` and `evaluate`:
 
 ```python
 >>> calc('+')
@@ -169,8 +169,45 @@ The `calc` function wraps `parse` and `evaluate`::
 
 ### The global environment
 
-and one data structure:
-* dictionary `global_environment`
+
+To evaluate symbols like `+` and `abs`,
+the evaluator fetches values stored in 
+a `dict`, the `global_env`
+
+```python
+>>> global_env['-']
+<built-in function sub>
+```
+
+The `define` special form takes a symbol and
+an expression, evaluates the expression, and
+binds the symbol to the expression in the
+`global_env`.
+
+```python
+>>> calc('(define n 1729)')
+>>> global_env['n']
+1729
+```
+
+You can `calc.py` as a script, to use it interactively.
+The `calc>` prompt evaluates expressions in the calculator language:
+
+```
+$ python3 calc.py 
+calc> (define $ 5.0901)
+calc> (* $ 200)
+1018.02
+calc> (define phi (/ (+ 1 (sqrt 5)) 2)) 
+calc> phi
+1.618033988749895
+calc> (* phi 5)
+8.090169943749475
+calc> 
+
+```
+
+
 
 
 
