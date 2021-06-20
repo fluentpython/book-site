@@ -238,7 +238,7 @@ To evaluate an expression `exp`, match its pattern with the appropriate rule:
 | pattern                                         | how to evaluate                   |
 |-------------------------------------------------|-----------------------------------|
 | `exp` is a `Symbol`                             | look up its value in the `global_env` |
-| `exp` is a literal but not a list               | it's number a, the value is itself |
+| `exp` is a literal but not a list               | it's number literal, the value is itself |
 | `exp` is a 3-item list starting with `'define'` | evaluate the `value_exp` and store the result in `global_env[var]`|
 | `exp` is a list with 1 or more items            | evaluate the first item to get a function, evaluate each argument, apply function to argument values |
 
