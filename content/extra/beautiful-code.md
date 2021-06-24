@@ -7,6 +7,10 @@ tags:
 - interpreter
 ---
 
+This post is about **Scheme** and Norvig's beautiful code: the **lis.py** interpreter for **Scheme**, written in 132 readable lines of **Python**.
+
+## Ok. But why?
+
 > The big revelation to me when I was in graduate school [was] when I finally understood that the half page of code on the bottom of page 13 of the Lisp 1.5 manual was Lisp in itself. These were “Maxwell’s Equations of Software!” This is the whole world of programming in a few lines that I can put my hand over.
 >
 > — [_A Conversation with Alan Kay_](https://queue.acm.org/detail.cfm?id=1039523)
@@ -18,9 +22,9 @@ tags:
 
 * **Scheme** is a cleaned up **Lisp**, dropping some bad ideas and adding _closures_. There are [lots of implementations](http://community.schemewiki.org/?scheme-faq-standards#implementations) of **Scheme**.
 * **Clojure** is a modern **Lisp** that compiles to **Java** bytecode and **JavaScript**. There's a [bank](https://building.nubank.com.br/working-with-clojure-at-nubank/) built with it.
-* **Lispy** is Peter Norvig's subset of **Scheme** written in 130 lines of readable and maintainable **Python**.
+* **Lispy** is Peter Norvig's subset of **Scheme**.
 
-This post is about **Scheme** and Norvig's beautiful code: the **lis.py** interpreter for **Lispy**.
+Now let's see what **Scheme** code looks like.
 
 ## Lots of Parenthesis
 
@@ -152,37 +156,37 @@ calc>
 
 `evaluate` is the most interesting part of the `calc.py`.
 
-In Python, it's best expressed as with a `match` statement:
+In Python, `evaluate` is best expressed with a `match` statement (introduced in Python 3.10):
 
 ```python
 
 def evaluate(exp: Expression) -> Any:
     "Evaluate an expression in an environment."
     match exp:
-        case Symbol(var):                               # variable reference
+        case Symbol(var):                           # variable reference
             return global_env[var]
-        case literal if not isinstance(exp, list):      # constant literal
+        case literal if not isinstance(exp, list):  # constant literal
             return literal
-        case ['define', Symbol(var), value_exp]:        # (define var exp)
+        case ['define', Symbol(var), value_exp]:    # (define var exp)
             global_env[var] = evaluate(value_exp)
-        case [Symbol(op), *args]:                       # (proc arg...)
+        case [Symbol(op), *args]:                   # (proc arg...)
             proc = evaluate(op)
             values = (evaluate(arg) for arg in args)
             return proc(*values)
 ```
 
 Without going into details, the code expresses the four rules
-of evaluation for the calculator language.
+of evaluation for the calculator language with amazing clarity.
 
 To evaluate an expression `exp`, match its pattern with the appropriate rule:
-
 
 | pattern                                         | how to evaluate                   |
 |-------------------------------------------------|-----------------------------------|
 | `exp` is a `Symbol`                             | look up its value in the `global_env` |
 | `exp` is a literal but not a list               | it's number literal, the value is itself |
 | `exp` is a 3-item list starting with `'define'` | evaluate the `value_exp` and store the result in `global_env[var]`|
-| `exp` is a list with 1 or more items            | evaluate the first item to get a function, evaluate each argument, apply function to argument values |
+| `exp` is a list with a `Symbol` and 0 or more items   | evaluate the first item to get a function, evaluate each argument, apply function to argument values |
+
 
 
 ### Why `if` cannot be a function call
