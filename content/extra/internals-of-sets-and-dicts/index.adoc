@@ -1,5 +1,5 @@
 ---
-title: "Internals of dicts and sets"
+title: "Internals of sets and dicts"
 date: 2021-06-24
 draft: false
 tags:
@@ -8,15 +8,23 @@ tags:
 - hash table
 ---
 
-=== Internals of sets and dicts
+* <<perf_experim_sec>>
+* <<hashes_and_equality>>
+* <<set_hash_tables_under_sec>>
+** <<hash_table_algorithm_sec>>
+** <<consequences_set_sec>>
+* <<hash_table_in_dict_sec>>
+** <<key_sharing_dict_sec>>
+** <<how_compact_dict_ordering_sec>> 
+** <<consequences_dict_sec>>
 
 Understanding how Python dictionaries and sets are built with hash tables is helpful to make sense of their strengths and limitations.
 
 [NOTE]
 =====
-Consider this section optional. You don't need to know all of these details to make good use of dictionaries and sets.
-But the implementation ideas are beautiful—that's why I covered them.
-For practical advice, you can skip to <<consequences_set_sec>> and <<consequences-dict-internals>>.
+You don't need to know all of these details to make good use of dictionaries and sets.
+But the implementation ideas are beautiful—that's why I describe them.
+For practical advice, you can skip to <<consequences_set_sec>> and <<consequences_dict_sec>>.
 =====
 
 Here are some questions this section will answer:
@@ -29,7 +37,8 @@ Here are some questions this section will answer:
 
 To motivate the study of hash tables, we start by showcasing the amazing performance of `dict` and `set` with a simple test involving millions of items.
 
-==== A Performance Experiment
+[[perf_experim_sec]]
+== A Performance Experiment
 
 From experience, all Pythonistas know that dicts and sets are fast. We'll confirm that with a controlled experiment.
 
@@ -49,8 +58,14 @@ for n in needles:
 ----
 ====
 
-I repeated the benchmark five times, each time increasing tenfold the size of `haystack`, from 1,000 to 10,000,000 items. The result of the `dict` performance test is in <<dict_perf_test_tbl>>.
+I repeated the benchmark five times, each time increasing tenfold the size of `haystack`, from 1,000 to 10,000,000 items. The result of the `dict` performance test is in <<table_dict_time>>.
 
+
+[[table_dict_time]]
+.Table 3-6
+image::images/table-dict-time.png[alt="Table showing timings for searching in dicts of sizes from 1,000 to 10,000,000."]
+
+////
 [[dict_perf_test_tbl]]
 .Total time for using `in` operator to search for 1,000 needles in haystack dicts of five sizes on a 2.2 GHz Core i7 laptop running Python 3.8.0 (tests timed the loop in <<ex_for_perf>>)
 [options="header"]
@@ -62,6 +77,7 @@ I repeated the benchmark five times, each time increasing tenfold the size of `h
 |     1,000,000 |  1,000× | 0.372ms | 3.76×
 |    10,000,000 | 10,000× | 0.512ms | 5.17×
 |==========================================
+////
 
 In concrete terms, to check for the presence of 1,000 floating-point keys in a dictionary with 1,000 items,
 the processing time on my laptop was 99µs, and the same search in a `dict` with 10,000,000 items took 512µs.
@@ -79,9 +95,15 @@ found = len(needles & haystack)
 ----
 ====
 
-<<set_dict_search_time_tbl>> shows the tests side by side. The best times are in the "set& time" column, which displays results for the set `&` operator using the code from <<ex_intersect_perf>>.
+<<table_dict_set_list_time>> shows the tests side by side. The best times are in the "set& time" column, which displays results for the set `&` operator using the code from <<ex_intersect_perf>>.
 As expected, the worst times are in the "list time" column, because there is no hash table to support searches with the `in` operator on a `list`, so a full scan must be made if the needle is not present, resulting in times that grow linearly with the size of the haystack.
 
+
+[[table_dict_set_list_time]]
+.Table 3-7
+image::images/table-dict-set-list-time.png[alt="Table showing timings for searching in dicts, sets, and lists of sizes from 1,000 to 10,000,000."]
+
+////
 [[set_dict_search_time_tbl]]
 .Total time for using in operator to search for 1,000 keys in haystacks of 5 sizes, stored as dicts, sets, and lists on a 2.2 GHz Core i7 laptop running Python 3.8.0 (tests timed the loop in <<ex_for_perf>> except the set&, which uses <<ex_intersect_perf>>)
 [options="header"]
@@ -93,43 +115,16 @@ As expected, the worst times are in the "list time" column, because there is no 
 |     1,000,000 |  1,000× | 0.372ms | 3.76× | 0.264ms | 2.47× | 0.240ms | 2.89× |  8,020.312ms |   879.90×
 |    10,000,000 | 10,000× | 0.512ms | 5.17× | 0.330ms | 3.08× | 0.298ms | 3.59× | 78,558.771ms | 8,618.63×
 |=========================================================================================================
+////
 
 If your program does any kind of I/O, the lookup time for keys in dicts or sets is negligible, regardless of the `dict` or `set` size (as long as it fits in RAM). See the code used to generate <<set_dict_search_time_tbl>> and accompanying discussion in <<support_scripts>>, <<support_container_perftest>>.
 
 Now that we have concrete evidence of the speed of dicts and sets, let's explore how that is achieved with the help of hash tables.
 
-==== Set hash tables under the hood
-
-Hash tables are a wonderful invention. Let's see how a hash table is used when adding elements to a set.
-
-Let's say we have a set with abbreviated workdays, created like this:
-
-[source, pycon]
-----
->>> workdays = {'Mon', 'Tue', 'Wed', 'Thu', 'Fri'}
->>> workdays
-{'Tue', 'Mon', 'Wed', 'Fri', 'Thu'}
-----
-
-The core data structure of a Python `set` is a hash table with at least 8 rows.
-Traditionally, the rows in hash table are called __buckets__footnote:[The word "bucket" makes more sense to describe hash tables that hold more than one element per row.
-Python stores only one element per row, but we will stick with the colorful traditional term.].
-
-A hash table holding the elements of `workdays` looks like <<fig_hash_table_0>>.
-
-[[fig_hash_table_0]]
-.Hash table for the set `{'Mon', 'Tue', 'Wed', 'Thu', 'Fri'}`. Each bucket has two fields: the hash code and a pointer to the element value. Empty buckets have -1 in the hash code field. The ordering looks random.
-image::images/hash-table-5.png[alt="Hash table with elements 'Mon' through 'Fri'."]
-
-In CPython built for a 64-bit CPU, each bucket in a set has two fields:
-a 64-bit hash code, and a 64-bit pointer to the element value—which is a Python object stored elsewhere in memory.
-Because buckets have a fixed size, access to an individual bucket is done by offset.
-There is no field for the indexes from 0 to 7 in <<fig_hash_table_0>>.
-
-Before covering the hash table algorithm, we need to know more about hash codes, and how they relate to equality.
+Before studying hash tables, we need to know more about hash codes, and how they relate to equality.
 
 [[hashes_and_equality]]
-===== Hashes and equality
+== Hashes and equality
 
 The `hash()` built-in function works directly with built-in types and falls back to calling `__hash__` for user-defined types. If two objects compare equal, their hash codes must also be equal, otherwise the hash table algorithm does not work. For example, because `1 == 1.0` is `True`, `hash(1) == hash(1.0)` must also be `True`, even though the internal representation of an `int` and a `float` are very different.footnote:[Since I just mentioned `int`, here is a CPython implementation detail: the hash code of an `int` that fits in a machine word is the value of the `int` itself, except the hash code of -1, which is -2.]
 
@@ -174,7 +169,7 @@ Details are in a note in the documentation for pass:[<a href="http://bit.ly/1FES
 ====
 
 [[hash_collisions]]
-===== Hash collisions
+=== Hash collisions
 
 As mentioned, on 64-bit CPython a hash code is a 64-bit number, and that's 2^64^ possible values—which is more than 10^19^.
 But most Python types can represent many more different values.
@@ -187,10 +182,44 @@ This means that objects that are different may have the same hash code.
 When correctly implemented, hashing guarantees that different hash codes always imply different objects, but the reverse is not true: different objects don't always have different hash codes. When different objects have the same hash code, that's a _hash collision_.
 ====
 
-With this basic understanding of hash codes and object equality, we are ready to dive into the algorithm that makes hash tables work, and how hash collisions are handled.
+With this basic understanding of hash codes and object equality, we are ready to dive into how hash tables work, and how hash collisions are handled.
 
-[[hash_table_algorithm]]
-==== The hash table algorithm
+
+[[set_hash_tables_under_sec]]
+== Set hash tables under the hood
+
+Hash tables are a wonderful invention. Let's see how a hash table is used when adding elements to a set.
+
+Let's say we have a set with abbreviated workdays, created like this:
+
+[source, pycon]
+----
+>>> workdays = {'Mon', 'Tue', 'Wed', 'Thu', 'Fri'}
+>>> workdays
+{'Tue', 'Mon', 'Wed', 'Fri', 'Thu'}
+----
+
+The core data structure of a Python `set` is a hash table with at least 8 rows.
+Traditionally, the rows in hash table are called __buckets__footnote:[The word "bucket" makes more sense to describe hash tables that hold more than one element per row.
+Python stores only one element per row, but we will stick with the colorful traditional term.].
+
+A hash table holding the elements of `workdays` looks like <<fig_hash_table_0>>.
+
+[[fig_hash_table_0]]
+.Hash table for the set `{'Mon', 'Tue', 'Wed', 'Thu', 'Fri'}`. Each bucket has two fields: the hash code and a pointer to the element value. Empty buckets have -1 in the hash code field. The ordering looks random.
+image::images/hash-table-5.png[alt="Hash table with elements 'Mon' through 'Fri'."]
+
+In CPython built for a 64-bit CPU, each bucket in a set has two fields:
+a 64-bit hash code, and a 64-bit pointer to the element value—which is a Python object stored elsewhere in memory.
+Because buckets have a fixed size, access to an individual bucket is done by offset.
+There is no field for the indexes from 0 to 7 in <<fig_hash_table_0>>.
+
+
+XXX
+
+
+[[hash_table_algorithm_sec]]
+=== The hash table algorithm
 
 We will focus on the internals of `set` first, and later transfer the concepts to `dict`.
 
@@ -203,14 +232,14 @@ Let's see how Python builds a set like `{'Mon', 'Tue', 'Wed', 'Thu', 'Fri'}`, st
 
 [[fig_flowchart_hash_add]]
 .Flowchart for algorithm to add element to the hash table of a set.
-image::images/flowchart-set-hash-add.pdf[alt="Hash table algorithm: adding element."]
+image::images/flowchart-set-hash-add.png[alt="Hash table algorithm: adding element."]
 
-====== Step 0: initialize hash table
+==== Step 0: initialize hash table
 
 As mentioned earlier, the hash table for a `set` starts with 8 empty buckets. As elements are added, Python makes sure at least ⅓ of the buckets are empty—doubling the size of the hash table when more space is needed. The hash code field of each bucket is initialized with -1, which means "no hash code"footnote:[The `hash()` built-in never returns -1 for any Python object.
 If `x.__hash__()` returns -1, `hash(x)` returns -2.].
 
-====== Step 1: compute the hash code for the element
+==== Step 1: compute the hash code for the element
 
 Given the literal `{'Mon', 'Tue', 'Wed', 'Thu', 'Fri'}`, Python gets the hash code for the first element, `'Mon'`.
 For example, here is a realistic hash code for `'Mon'`—you'll probably get a different result because of the random salt Python uses to compute the hash code of strings:
@@ -221,7 +250,7 @@ For example, here is a realistic hash code for `'Mon'`—you'll probably get a d
 4199492796428269555
 ----
 
-====== Step 2: probe hash table at index derived from hash code
+==== Step 2: probe hash table at index derived from hash code
 
 Python takes the modulus of the hash code with the table size to find a hash table index. Here the table size is 8, and the modulus is 3:
 
@@ -234,7 +263,7 @@ Python takes the modulus of the hash code with the table size to find a hash tab
 Probing consists of computing the index from the hash, then looking at the corresponding bucket in the hash table.
 In this case, Python looks at the bucket at offset 3 and finds -1 in the hash code field, marking an empty bucket.
 
-====== Step 3: put the element in the empty bucket
+==== Step 3: put the element in the empty bucket
 
 Python stores the hash code of the new element, 4199492796428269555, in the hash code field at offset 3, and a pointer to the string object `'Mon'` in the element field. <<fig_hash_table_1>> shows the current state of the hash table.
 
@@ -242,7 +271,7 @@ Python stores the hash code of the new element, 4199492796428269555, in the hash
 .Hash table for the set `{'Mon'}`.
 image::images/hash-table-1.png[alt="Hash table with element 'Mon'."]
 
-===== Steps for remaining items
+==== Steps for remaining items
 
 For the second element, `'Tue'`, steps 1, 2, 3 above are repeated. The hash code for `'Tue'` is 2414279730484651250, and the resulting index is 2.
 
@@ -260,7 +289,7 @@ The hash and pointer to element `'Tue'` are placed in bucket 2, which was also e
 .Hash table for the set `{'Mon', 'Tue'}`. Note that element ordering is not preserved in the hash table.
 image::images/hash-table-2.png[alt="Hash table with elements 'Mon' and 'Tue'."]
 
-===== Steps for a collision
+==== Steps for a collision
 
 When adding `'Wed'` to the set, Python computes the hash -5145319347887138165 and index 3.
 Python probes bucket 3 and sees that it is already taken. But the hash code stored there, 4199492796428269555 is different.
@@ -306,7 +335,7 @@ Given the following `set`, what happens when you add an integer `1` to it?
 How many elements are in `s` now? Does `1` replace the element `1.0`?
 When you have your answer, use the Python console to verify it.
 
-===== Searching elements in a hash table
+==== Searching elements in a hash table
 
 Consider the `workdays` set with the hash table shown in <<fig_hash_table_4>>.
 Is `'Sat'` in it? This is the simplest execution path for the expression `'Sat' in workdays`:
@@ -330,7 +359,7 @@ If an empty bucket is found, the element is not present, so Python returns `Fals
 otherwise, when both the hash code and the values of the sought element match an element in the hash table, the return is `True`.
 
 [[consequences_set_sec]]
-===== Practical Consequences of How Sets Work
+=== Practical Consequences of How Sets Work
 
 The `set` and `frozenset` types are both implemented with a hash table, which has these effects:
 
@@ -341,7 +370,8 @@ The `set` and `frozenset` types are both implemented with a hash table, which ha
 * Adding elements to a set may change the order of other elements. That's because, as the hash table is filled, Python may need to recreate it to keep at least ⅓ of the buckets empty. When this happens, elements are reinserted and different collisions may occur.
 
 
-==== Hash table usage in `dict`
+[[hash_table_in_dict_sec]]
+== Hash table usage in `dict`
 
 [quote, Brandon Rhodes, in The Dictionary Even Mightier]
 ____
@@ -357,7 +387,8 @@ The second is called https://docs.python.org/3/whatsnew/3.6.html#new-dict-implem
 As a side effect, the compact `dict` space optimization preserves key insertion order.
 In the next sections we'll discuss the compact `dict` and the new key-sharing scheme—in this order, for easier presentation.
 
-===== How compact `dict` saves space and keeps ordering
+[[how_compact_dict_ordering_sec]]
+=== How compact `dict` saves space and keeps ordering
 
 [NOTE]
 ====
@@ -410,25 +441,25 @@ plus 8 bytes for the buckets in `indices`—configured as an array of 8 bytes.
 
 The next section describes how those two arrays are used.
 
-===== Algorithm for adding items to compact `dict`.
+==== Algorithm for adding items to compact `dict`.
 
-====== Step 0: set up `indices`
+===== Step 0: set up `indices`
 
 The `indices` table is initially set up as an array of signed bytes, with 8 buckets, each initialized with -1 to signal "empty bucket".
 Up to 5 of these buckets will eventually hold indices to rows in the `entries` array, leaving ⅓ of them with -1.
 The other array, `entries`, will hold key/value data with the same three fields as in the old scheme—but in insertion order.
 
-====== Step 1: compute hash code for the key
+===== Step 1: compute hash code for the key
 
 To add the key-value pair `('Mon', 14)` to the `swimmers` dictionary,
 Python first calls `hash('Mon')` to compute the hash code of that key.
 
-====== Step 2: probe `entries` via `indices`
+===== Step 2: probe `entries` via `indices`
 
 Python computes `hash('Mon') % len(indices)`. In our example, this is 3.
 Offset 3 in `indices` holds -1: it's an empty bucket.
 
-====== Step 3: put key-value in `entries`, updating `indices`.
+===== Step 3: put key-value in `entries`, updating `indices`.
 
 The `entries` array is empty, so the next available offset there is 0.
 Python puts 0 at offset 3 in `indices` and stores
@@ -454,7 +485,7 @@ Now the state is <<fig_hash_table_dict_compact_2>>. Note that `entries` holds th
 .Compact storage for the `{'Mon': 14, 'Tue': 12}`.
 image::images/hash-table-compact-2.png[alt="Arrays for compact `dict` with 2 key-value pairs."]
 
-===== Steps for a collision
+==== Steps for a collision
 
 . Compute hash code of key `'Wed'`.
 . Now, `hash('Wed') % len(indices)` is 3. `indices[3]` has 0, pointing to an existing entry.
@@ -470,7 +501,7 @@ After adding `('Wed', 14)`, we have <<fig_hash_table_dict_compact_3>>
 .Compact storage for the `{'Mon': 14, 'Tue': 12, 'Wed': 14}`.
 image::images/hash-table-compact-3.png[alt="Arrays for compact `dict` with 3 key-value pairs."]
 
-===== How a compact `dict` grows
+==== How a compact `dict` grows
 
 Recall that the buckets in the `indices` array are 8 signed bytes initially, enough to hold offsets for up to 5 entries, leaving ⅓ of the buckets empty.
 When the 6th item is added to the `dict`, `indices` is reallocated to 16 buckets—enough for 10 entry offsets.
@@ -486,7 +517,7 @@ This concludes our summary of the compact `dict` implementation.
 I omitted many details, but now let's take a look at the other space-saving optimization for dictionaries: key-sharing.
 
 [[key_sharing_dict_sec]]
-==== Key-sharing dictionary
+=== Key-sharing dictionary
 
 Instances of user-defined classes usually hold their attributes in a `__dict__`
 attribute which is a regular dictionaryfootnote:[Unless the class has a `__slots__` attribute, as we'll see in chapter XXX].
@@ -526,8 +557,8 @@ When a `dict` converts from one layout to the other, the change happens in `PyDi
 with the help of other internal data structures.
 
 
-[[consequences-dict-internals]]
-==== Practical Consequences of How dict Works
+[[consequences_dict_sec]]
+=== Practical Consequences of How dict Works
 
 * Keys must be hashable objects. They must implement proper `__hash__` and `__eq__` methods as described in <<what_is_hashable>>.
 * Key searches are nearly as fast as element searches in sets.

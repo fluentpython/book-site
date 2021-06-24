@@ -8,12 +8,15 @@ tags:
 - bisect
 - standard library
 ---
+:toc: macro
 
-=== Managing Ordered Sequences with bisect
+The `bisect` module offers two main functions that use the binary search algorithm to quickly find and insert items in any sorted sequence.
 
-The `bisect` module offers two main functions—++bisect++ and ++insort++—that use the binary search algorithm to quickly find and insert items in any sorted sequence.
+* <<searching_sec>>
+* <<insort_sec>>
 
-==== Searching with bisect
+[[searching_sec]]
+== Searching with `bisect`
 
 `bisect(haystack, needle)` does a binary search for `needle` in ++haystack++—which must be a sorted sequence--to locate the position where `needle` can be inserted while maintaining `haystack` in ascending order.
 In other words, all items appearing up to that position are less than or equal to `needle`.
@@ -32,7 +35,7 @@ Its output is in <<ex_bisect_demo_output>>.
 ====
 [source, py]
 ----
-include::code/bisect/bisect_demo.py[tags=BISECT_DEMO]
+include::./content/extra/ordered-sequences-with-bisect/bisect_demo.py[tags=BISECT_DEMO]
 ----
 ====
 <1> Use the chosen `bisect` function to get the insertion point.
@@ -52,7 +55,7 @@ It's defined once, then `.format()` is called multiple times in a `for` loop.
 
 [[ex_bisect_demo_output]]
 .Output of <<ex_bisect_demo>> with bisect in use&#x2014;each row starts with the notation needle @ position and the needle value appears again below its insertion point in the haystack
-image::img/bisect/flup_0204.png[alt="Output of `bisect_demo.py`"]
+image::images/flup_0204.png[alt="Output of `bisect_demo.py`"]
 
 The behavior of `bisect` can be fine-tuned in two ways.
 
@@ -66,7 +69,7 @@ For example, `1` and `1.0` are distinct, but `1 == 1.0` is `True`. <<ex_bisect_d
 
 [[ex_bisect_demo_left_output]]
 .Output of <<ex_bisect_demo>> with bisect_left in use (compare with <<ex_bisect_demo_output>> and note the insertion points for the values 1, 8, 23, 29, and 30 to the left of the same numbers in the haystack).
-image::img/bisect/flup_0205.png[alt="Output of `bisect_demo.py` running `bisect_left`."]
+image::images/flup_0205.png[alt="Output of `bisect_demo.py` running `bisect_left`."]
 
 An interesting application of `bisect` is to perform table lookups by numeric values--for example,
 to convert test scores to letter grades, as in <<ex_bisect_lookup>>.
@@ -112,8 +115,8 @@ These functions are not only used for searching, but also for inserting items in
 as the following section shows.
 
 
-[[insort]]
-==== Inserting with bisect.insort
+[[insort_sec]]
+== Inserting with `insort`
 
 Sorting is expensive, so once you have a sorted sequence, it's good to keep it that way.
 That is why `bisect.insort` was created.
@@ -126,13 +129,13 @@ See <<ex_insort>> and its output in <<ex_insort_output>>.
 ====
 [source, python3]
 ----
-include::code/bisect/bisect_insort.py[]
+include::./content/extra/ordered-sequences-with-bisect/bisect_insort.py[]
 ----
 ====
 
 [[ex_insort_output]]
 .Output of <<ex_insort>>
-image::img/bisect/flup_0206.png[alt="Output of `bisect_insort.py`."]
+image::images/flup_0206.png[alt="Output of `bisect_insort.py`."]
 
 
 Like `bisect`, `insort` takes optional `lo`, `hi` arguments to limit the search to a sub-sequence.
