@@ -13,3 +13,4 @@ Source code and content for [fluentpython.com](fluentpython.com).
 * [Blogging with Asciidoctor and Hugo](https://foo-dogsquared.github.io/blog/posts/blogging-with-asciidoctor-and-hugo/) (2019, 2020): first hit in Google search for _using hugo with asciidoc_.
 * [Get Hugo to render (nice) Asciidocs](https://blog.anoff.io/2019-02-17-hugo-render-asciidoc/) (2019): a few hacks.
 * [AsciiDoc support for Hugo on Netlify](https://patrickpeeters.com/2019/09/asciidoc-support-for-hugo-on-netlify/) (2019)
+* [Provide asciidoc/asciidoctor on the builder nodes](https://answers.netlify.com/t/provide-asciidoc-asciidoctor-on-the-builder-nodes/12133) (2020)
