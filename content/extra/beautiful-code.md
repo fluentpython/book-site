@@ -12,7 +12,7 @@ tags:
 > — [_A Conversation with Alan Kay_](https://queue.acm.org/detail.cfm?id=1039523)
 
 
-**Lisp** and **Fortran** are the only programming languages from the 1950's that are still widely used in 2021. 
+**Lisp** and **Fortran** are the only programming languages from the 1950's that are still widely used in 2021.
 
 **Lisp** has a simple core, but is powerful and malleable. Over the decades, several **Lisp** dialects emerged.
 
@@ -68,6 +68,122 @@ _Lispers_ prefer to say that `define` and `if` are _special forms_ instead of st
 The are like the keywords that mark special syntax and semantics in other
 languages—instructions that cannot be expressed as function calls.
 
+## An expression evaluator
+
+In the [post](https://norvig.com/lispy.html) where Peter Norvig presents **lis.py**,
+he describes a **Lispy Calculator**, a tiny subset of Scheme
+that allows computing arithmetic expressions and defining constants.
+
+The code of `calc.py` has two major functions:
+
+* function `parse(source: str) -> Expression`
+* function `evaluate(exp: Expression) -> Any`
+
+They are used like this:
+
+```python
+>>> from calc import parse, evaluate
+>>> parse('(* 7 (+ 2 4))')
+['*', 7, ['+', 2, 4]]
+>>> evaluate(parse('(* 7 (+ 2 4))'))
+42
+```
+
+`parse` takes source code as a string, and returns an `Expression`
+built of Python objects:
+
+* `int` and `float` numbers;
+* `str` used as identifiers (_symbols_ in Lisp parlance);
+* lists of numbers, symbols, and nested lists;
+
+`evaluate` takes an `Expression` and returns its value,
+which may be of the above types and other types,
+such as function objects.
+
+The `calc` function wraps `parse` and `evaluate`:
+
+```python
+>>> calc('+')
+<built-in function add>
+>>> calc('(* 111 111)')
+12321
+```
+
+### The global environment
+
+To evaluate symbols like `+` and `abs`,
+the evaluator fetches values stored in
+a `dict`, the `global_env`
+
+```python
+>>> global_env['-']
+<built-in function sub>
+```
+
+The `define` special form takes a symbol and
+an expression, evaluates the expression, and
+binds the symbol to the expression in the
+`global_env`.
+
+```python
+>>> calc('(define n 1729)')
+>>> global_env['n']
+1729
+```
+
+You can `calc.py` as a script, to use it interactively.
+The `calc>` prompt evaluates expressions in the calculator language:
+
+```
+$ python3 calc.py
+calc> (define $ 5.0901)
+calc> (* $ 200)
+1018.02
+calc> (define phi (/ (+ 1 (sqrt 5)) 2))
+calc> phi
+1.618033988749895
+calc> (* phi 5)
+8.090169943749475
+calc>
+
+```
+
+### The `evaluate` function
+
+`evaluate` is the most interesting part of the `calc.py`.
+
+In Python, it's best expressed as with a `match` statement:
+
+```python
+
+def evaluate(exp: Expression) -> Any:
+    "Evaluate an expression in an environment."
+    match exp:
+        case Symbol(var):                               # variable reference
+            return global_env[var]
+        case literal if not isinstance(exp, list):      # constant literal
+            return literal
+        case ['define', Symbol(var), value_exp]:        # (define var exp)
+            global_env[var] = evaluate(value_exp)
+        case [Symbol(op), *args]:                       # (proc arg...)
+            proc = evaluate(op)
+            values = (evaluate(arg) for arg in args)
+            return proc(*values)
+```
+
+Without going into details, the code expresses the four rules
+of evaluation for the calculator language.
+
+To evaluate an expression `exp`, match its pattern with the appropriate rule:
+
+
+| pattern                                         | how to evaluate                   |
+|-------------------------------------------------|-----------------------------------|
+| `exp` is a `Symbol`                             | look up its value in the `global_env` |
+| `exp` is a literal but not a list               | it's number literal, the value is itself |
+| `exp` is a 3-item list starting with `'define'` | evaluate the `value_exp` and store the result in `global_env[var]`|
+| `exp` is a list with 1 or more items            | evaluate the first item to get a function, evaluate each argument, apply function to argument values |
+
 
 ### Why `if` cannot be a function call
 
@@ -117,7 +233,7 @@ Given this expression...
 ...when:
 
 * `x` is a function, the arguments `a`, `b`, and `c` will be evaluated before `x` is applied to them.
-* `x` is a special form, then `a`, `b`, and `c` may or may not be evaluated, depending on the implementation of `x`. 
+* `x` is a special form, then `a`, `b`, and `c` may or may not be evaluated, depending on the implementation of `x`.
 
 In particular, the special form `quote` prevents all arguments from being evaluated, returning them as they are:
 
@@ -126,126 +242,6 @@ lis.py> (quote (a b (/ 1 0) whatever *))
 (a b (/ 1 0) whatever *)
 ```
 
-## An expression evaluator
-
-In the [post](https://norvig.com/lispy.html) where Peter Norvig presents **lis.py**,
-he describes a **Lispy Calculator**, a tiny subset of Scheme
-that allows computing arithmetic expressions and defining constants.
-
-The code of `calc.py` has two major functions: 
-
-* function `parse(source: str) -> Expression`
-* function `evaluate(exp: Expression) -> Any`
-
-They are used like this:
-
-```python
->>> from calc import parse, evaluate
->>> parse('(* 7 (+ 2 4))')
-['*', 7, ['+', 2, 4]]
->>> evaluate(parse('(* 7 (+ 2 4))'))
-42
-```
-
-`parse` takes source code as a string, and returns an `Expression`
-built of Python objects:
-
-* `int` and `float` numbers;
-* `str` used as identifiers (_symbols_ in Lisp parlance);
-* lists of numbers, symbols, and nested lists;
-
-`evaluate` takes an `Expression` and returns its value,
-which may be of the above types and other types,
-such as function objects.
-
-The `calc` function wraps `parse` and `evaluate`:
-
-```python
->>> calc('+')
-<built-in function add>
->>> calc('(* 111 111)')
-12321
-```
-
-### The global environment
-
-To evaluate symbols like `+` and `abs`,
-the evaluator fetches values stored in 
-a `dict`, the `global_env`
-
-```python
->>> global_env['-']
-<built-in function sub>
-```
-
-The `define` special form takes a symbol and
-an expression, evaluates the expression, and
-binds the symbol to the expression in the
-`global_env`.
-
-```python
->>> calc('(define n 1729)')
->>> global_env['n']
-1729
-```
-
-You can `calc.py` as a script, to use it interactively.
-The `calc>` prompt evaluates expressions in the calculator language:
-
-```
-$ python3 calc.py 
-calc> (define $ 5.0901)
-calc> (* $ 200)
-1018.02
-calc> (define phi (/ (+ 1 (sqrt 5)) 2)) 
-calc> phi
-1.618033988749895
-calc> (* phi 5)
-8.090169943749475
-calc> 
-
-```
-
-### The `evaluate` function
-
-`evaluate` is the most interesting part of the `calc.py`.
-
-In Python, it's best expressed as with a `match` statement:
-
-```python
-
-def evaluate(exp: Expression) -> Any:
-    "Evaluate an expression in an environment."
-    match exp:
-        case Symbol(var):                               # variable reference
-            return global_env[var]
-        case literal if not isinstance(exp, list):      # constant literal
-            return literal
-        case ['define', Symbol(var), value_exp]:        # (define var exp)
-            global_env[var] = evaluate(value_exp)
-        case [Symbol(op), *args]:                       # (proc arg...)
-            proc = evaluate(op)
-            values = (evaluate(arg) for arg in args)
-            return proc(*values)
-```
-
-Without going into details, the code expresses the four rules
-of evaluation for the calculator language.
-
-To evaluate an expression `exp`, match its pattern with the appropriate rule:
-
-
-| pattern                                         | how to evaluate                   |
-|-------------------------------------------------|-----------------------------------|
-| `exp` is a `Symbol`                             | look up its value in the `global_env` |
-| `exp` is a literal but not a list               | it's number literal, the value is itself |
-| `exp` is a 3-item list starting with `'define'` | evaluate the `value_exp` and store the result in `global_env[var]`|
-| `exp` is a list with 1 or more items            | evaluate the first item to get a function, evaluate each argument, apply function to argument values |
-
-
-
-
-
-
+### To be continued...
 
 _LR_
