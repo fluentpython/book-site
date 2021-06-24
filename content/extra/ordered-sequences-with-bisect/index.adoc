@@ -1,14 +1,13 @@
 ---
 title: "Managing Ordered Sequences with Bisect"
 date: 2021-06-17T20:01:08-03:00
-draft: true
+draft: false
 tags:
 - sequence
 - sort
 - bisect
 - standard library
 ---
-:toc: macro
 
 The `bisect` module offers two main functions that use the binary search algorithm to quickly find and insert items in any sorted sequence.
 

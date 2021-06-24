@@ -1,15 +1,10 @@
 ---
-date: "2017-06-26T18:27:58+01:00"
+date: "2021-06-19"
 title: "Fluent Python, Second Edition"
 ---
 
+This site complements
+**[Fluent Python, Second Edition](https://learning.oreilly.com/library/view/fluent-python-2nd/9781492056348/)**
+with [_extra content_](/extra/) that did not fit in the book.
 
-This site complements [Fluent Python, Second Edition](https://learning.oreilly.com/library/view/fluent-python-2nd/9781492056348/) with:
-
-{{< ticks >}}
-* _Extra content_ that did not fit in the book.
-* More _Soapbox_ posts: opinionated takes on programming languages, etc.
-* Updates to content or code examples (none yet).
-{{< /ticks >}}
-
-_Luciano Ramalho_
+![Cover of Fluent Python](/images/fluent-python-cover-drop-shadow.png "Cover of Fluent Python, with a desert lizard (Pedioplanis namaquensis).")

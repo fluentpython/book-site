@@ -1,6 +1,6 @@
 ---
 title: "Internals of sets and dicts"
-date: 2021-06-24
+date: 2021-06-24T19:19:18-03:00
 draft: false
 tags:
 - dict
@@ -133,9 +133,8 @@ Also, to be effective as hash table indexes, hash codes should scatter around th
 [[ex_hashdiff_output]]
 .Comparing hash bit patterns of 1, 1.0001, 1.0002, and 1.0003 on a 32-bit build of Python (bits that are different in the hashes above and below are highlighted with ! and the right column shows the number of bits that differ)
 ====
-[source, pycon]
-[listing]
-....
+[source]
+----
 32-bit Python build
 1        00000000000000000000000000000001
                                           != 0
@@ -153,10 +152,8 @@ Also, to be effective as hash table indexes, hash codes should scatter around th
           ! !   ! !!! ! !  !! ! !  ! !!!! != 17
 1.0003   00001100000111110010000010010110
 ------------------------------------------------
-....
+----
 ====
-
-The code to produce <<ex_hashdiff_output>> is in <<support_scripts>>. Most of it deals with formatting the output, but it is listed as <<support_hashdiff>> for completeness.
 
 [NOTE]
 ====
@@ -211,11 +208,8 @@ image::images/hash-table-5.png[alt="Hash table with elements 'Mon' through 'Fri'
 
 In CPython built for a 64-bit CPU, each bucket in a set has two fields:
 a 64-bit hash code, and a 64-bit pointer to the element value—which is a Python object stored elsewhere in memory.
-Because buckets have a fixed size, access to an individual bucket is done by offset.
-There is no field for the indexes from 0 to 7 in <<fig_hash_table_0>>.
-
-
-XXX
+Because buckets have a fixed size, individual buckets are accessed by offset from the start of the hash table.
+In other words, the indexes 0 to 7 in <<fig_hash_table_0>> are not stored, they are just offsets.
 
 
 [[hash_table_algorithm_sec]]
