@@ -1,6 +1,6 @@
 # Fluent Python, the site
 
-Source code and content for [fluentpython.com](fluentpython.com).
+Source code and content for [fluentpython.com](https://fluentpython.com).
 
 
 ## References
