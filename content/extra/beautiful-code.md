@@ -1,30 +1,60 @@
 ---
-title: "A Beautiful Piece of Code"
+title: "A Beautiful Piece of Code: lis.py"
 date: 2021-06-17T17:52:48-03:00
 draft: false
 tags:
 - Lisp
 - interpreter
+- beautiful code
 ---
 
-This post is about **Scheme** and Norvig's beautiful code: the **lis.py** interpreter for **Scheme**, written in 132 readable lines of **Python**.
+This post is about [Peter Norvig](https://norvig.com/)'s beautiful
+**[lis.py](https://norvig.com/lispy.html)** interpreter for **Scheme**,
+written in 132 readable lines of **Python**.
 
 ## Ok. But why?
 
-> The big revelation to me when I was in graduate school [was] when I finally understood that the half page of code on the bottom of page 13 of the Lisp 1.5 manual was Lisp in itself. These were “Maxwell’s Equations of Software!” This is the whole world of programming in a few lines that I can put my hand over.
+> The big revelation to me when I was in graduate school [was] when I finally
+> understood that the half page of code on the bottom of page 13 of the Lisp 1.5 manual
+> was Lisp in itself.
+> These were “Maxwell’s Equations of Software!”
+> This is the whole world of programming in a few lines that I can put my hand over.
 >
 > — [_A Conversation with Alan Kay_](https://queue.acm.org/detail.cfm?id=1039523)
 
-
-**Lisp** and **Fortran** are the only programming languages from the 1950's that are still widely used in 2021.
-
 **Lisp** has a simple core, but is powerful and malleable. Over the decades, several **Lisp** dialects emerged.
 
-* **Scheme** is a cleaned up **Lisp**, dropping some bad ideas and adding _closures_. There are [lots of implementations](http://community.schemewiki.org/?scheme-faq-standards#implementations) of **Scheme**.
-* **Clojure** is a modern **Lisp** that compiles to **Java** bytecode and **JavaScript**. There's a [bank](https://building.nubank.com.br/working-with-clojure-at-nubank/) built with it.
-* **Lispy** is Peter Norvig's subset of **Scheme**.
+* **Scheme** is a cleaned up **Lisp**, dropping some bad ideas and adding _closures_.
+There are [lots of implementations](http://community.schemewiki.org/?scheme-faq-standards#implementations) of **Scheme**.
+* **Clojure** is a modern **Lisp** that compiles to **Java** bytecode and **JavaScript**.
+It's the main programming language in a
+[retail bank](https://building.nubank.com.br/working-with-clojure-at-nubank/)
+with millions of clients.
+* **Lispy** is Peter Norvig's subset of **Scheme** written in **Python**.
 
-Now let's see what **Scheme** code looks like.
+Learning how **Lisp** works is a sound investment of your time because
+it makes some fundamentals of Computer Science more visible and accessible,
+and those fundamentals apply to any programming language.
+
+**Lisp** and **Fortran** are the only programming languages from the 1950's that are still widely used in 2021.
+There are reasons for that.
+**Lisp** stays relevant because it's one of the most flexible and extensible languages you will ever learn.
+
+**Lisp** is so extensible that it can adopt programming paradigms from other languages.
+For example:
+
+* The [Common Lisp Object System](https://en.wikipedia.org/wiki/Common_Lisp_Object_System)
+brought Object Oriented Programming to **Lisp** two years after C++ appeared (eight years before **Java**).
+* Shortly after **Go** popularized [CSP-style](https://en.wikipedia.org/wiki/Communicating_sequential_processes)
+concurrency with coroutines and channels, **Clojure**
+[implemented the same idea](https://clojure.org/news/2013/06/28/clojure-clore-async-channels).
+
+In both cases, the new paradigm would not work well in a less flexible language.
+
+Studying **lis.py** is a quick dive into the elegance and power of **Lisp**,
+exploring not only its basic syntax, but how it works deep down, as it is implemented in two pages of code.
+
+Now let's see what the **Scheme** dialect looks like.
 
 ## Lots of Parenthesis
 
@@ -40,8 +70,10 @@ lis.py> (* 6 7)
 
 More formally, an _s-expression_ consists of:
 
-* An _atom_. Four examples of atoms: `*`, `define`, `-3` or `3.141592653589793`;
-* an expression of the form `(…)` where `…` is 0 or more _s-expressions.
+* An _atom_. Examples of atoms: `*`, `define`, `-3` or `3.141592653589793`;
+* an expression of the form `(x)` where `x` is 0 or more _s-expressions_.
+
+Yes that is a recursive definition. _Lispers_ 💜 recursion.
 
 Atoms like `*` and `define` are called _symbols_.
 An atom may be a symbol or a number.
@@ -159,17 +191,16 @@ calc>
 In Python, `evaluate` is best expressed with a `match` statement (introduced in Python 3.10):
 
 ```python
-
 def evaluate(exp: Expression) -> Any:
     "Evaluate an expression in an environment."
     match exp:
-        case Symbol(var):                           # variable reference
+        case Symbol(var):                         # variable reference
             return global_env[var]
-        case literal if not isinstance(exp, list):  # constant literal
-            return literal
-        case ['define', Symbol(var), value_exp]:    # (define var exp)
+        case int(x) | float(x):                   # number literal
+            return x
+        case ['define', Symbol(var), value_exp]:  # (define var exp)
             global_env[var] = evaluate(value_exp)
-        case [Symbol(op), *args]:                   # (proc arg...)
+        case [Symbol(op), *args]:                 # (proc arg...)
             proc = evaluate(op)
             values = (evaluate(arg) for arg in args)
             return proc(*values)
@@ -183,9 +214,9 @@ To evaluate an expression `exp`, match its pattern with the appropriate rule:
 | pattern                                         | how to evaluate                   |
 |-------------------------------------------------|-----------------------------------|
 | `exp` is a `Symbol`                             | look up its value in the `global_env` |
-| `exp` is a literal but not a list               | it's number literal, the value is itself |
+| `exp` is an `int` or `float`                    | it's a number literal, the value is itself |
 | `exp` is a 3-item list starting with `'define'` | evaluate the `value_exp` and store the result in `global_env[var]`|
-| `exp` is a list with a `Symbol` and 0 or more items   | evaluate the first item to get a function, evaluate each argument, apply function to argument values |
+| `exp` is a list starting with a `Symbol`, with 0 or more items   | evaluate the first item to get a function, evaluate each argument, apply function to argument values |
 
 
 
