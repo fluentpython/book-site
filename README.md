@@ -1,7 +1,11 @@
 # Fluent Python, the site
 
-Source code and content for [fluentpython.com](fluentpython.com).
+Source code and content for [fluentpython.com](https://fluentpython.com).
 
+The site complements **[Fluent Python, Second Edition](https://learning.oreilly.com/library/view/fluent-python-2nd/9781492056348/)**
+with [extra content](https://www.fluentpython.com/extra/) that did not fit in the book. It does not include the full text of the book.
+
+The source code for examples in the book is in a different repository: [fluentpython/example-code-2e](https://github.com/fluentpython/example-code-2e).
 
 ## References
 
