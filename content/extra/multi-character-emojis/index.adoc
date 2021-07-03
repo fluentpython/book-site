@@ -11,7 +11,7 @@ Unicode has always supported building accented characters by combining letters a
 To accommodate the growing demand for emojis,
 this idea has been extended to produce different pictographs by combining special markers and emoji characters.
 
-This post is split in four parts:
+Contents of this post:
 
 . <<country_flags_sec>>
 . <<skin_sec>>
@@ -23,9 +23,11 @@ This post is split in four parts:
 == Country Flags
 
 Throughout history, countries split, join, mutate or simply adopt new flags.
-The Unicode consortium found a way to avoid keeping up with those changes and outsource the problem to the systems that claim Unicode support:
+The Unicode consortium found a way to avoid keeping up with those changes
+and outsource the problem to the systems that claim Unicode support:
 its character database has no country flags.
-Instead, there is a set of 26 "regional indicator symbols", corresponding to latin letters from A to Z with codes from U+1F1E6 to U+1F1FF."
+Instead, there is a set of 26 "regional indicator symbols",
+corresponding to latin letters from A to Z and assigned codes from U+1F1E6 to U+1F1FF.
 When you combine two of those indicator letters to form an ISO 3166-1 country code,
 you get the corresponding country flag—if the UI supports it.
 <<ex_two_flags>> shows how.
