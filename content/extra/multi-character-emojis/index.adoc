@@ -19,7 +19,7 @@ This post is split in four parts:
 . <<further_sec>>
 
 [[country_flags_sec]]
-== Country flags
+== Country Flags
 
 Throughout history, countries split, join, mutate or simply adopt new flags.
 The Unicode consortium found a way to avoid keeping up with those changes and outsource the problem to the systems that claim Unicode support:
@@ -117,22 +117,14 @@ image::images/skin_demo.png[alt="Thumbs up emoji in 6 colors."]
 Let's now move to more complex emoji combinations using special markers.
 
 [[rainbow_sec]]
-== Rainbow Flag and Other ZWJ Sequences
+== Rainbow Flag and Modern Families
 
 Besides the special purpose indicators and modifiers we've seen,
-Unicode provides a marker that is used as glue between emojis and other characters,
-to produce new combinations: U+200D, ZERO WIDTH JOINER—a.k.a. ZWJ in many Unicode documents.
+Unicode provides an invisible marker used as glue between emojis and other characters,
+to produce new combinations: U+200D, ZERO WIDTH JOINER—nicknamed "ZWJ" in many Unicode documents.
 
 For example, the rainbow flag is built by joining the emojis WAVING WHITE FLAG and RAINBOW,
 as <<fig_rainbow_flag>> shows.
-
-////
-@@Leo
-
-I added what I thought was a missing "the" and a comma in the sentence above,
-between "For example" and "rainbow flag".
-
-////
 
 [[fig_rainbow_flag]]
 .Making the rainbow flag in the Python console.
@@ -159,36 +151,23 @@ include::./content/extra/multi-character-emojis/zwj_sample.py[]
 
 One trend in modern Unicode is the addition of gender-neutral emojis such as SWIMMER (U+1F3CA) or ADULT (U+1F9D1),
 which can then be shown as they are, or with different gender in ZWJ sequences with the female sign ♀ (U+2640) or the male sign ♂ (U+2642).
+
 The Unicode Consortium is also moving towards more diversity in the supported family emojis.
-// @@miro update date
 <<fig_emoji_families>> is a matrix of family emojis showing current support for families with different combinations of parents and children—as of January 2020.
 
 [[fig_emoji_families]]
 .The table shows adult singles and couples at the top, and boys and girls on the left-hand side. Cells have the combined emoji of a family with the parent(s) from the top and kid(s) from the left. If a combination is not supported by the browser, more than one emoji will appear inside a cell. Firefox 72 on Windows 10 is able to show all combinations.
 image::images/emoji_families.png[alt="Matrix of emoji families"]
 
-The code I wrote to build <<fig_emoji_families>> is mostly concerned with HTML formatting, but is listed in <<ex_emoji_families>> for completeness.
+The code I wrote to build <<fig_emoji_families>> uses the
+https://bottlepy.org/docs/dev/[Bottle framework]
+to build and serve an HTML page with that matrix of Unicode family emojis.
+You can see it in this site's https://github.com/fluentpython/book-site/blob/main/content/extra/multi-character-emojis/emoji_families.py[repository].
 
-////
-@@Jurgen
+To see the page, install https://pypi.org/project/bottle/[Bottle],
+run the _emoji_families.py_ script and visit http://localhost:8080/[http://localhost:8080/].
 
-you write "but is listed in ??? for completeness."
-
-Again, our friends the three question marks.
-
-@@Leo
-
-Jurgen is talking about `ex_emoji_families`,
-which is mentioned above but is not defined anywhere in this repo so far.
-
-By the way, there is an "Example 4-28" on a line by itself in the PDF at this point, with no actual source code attached to it.
-
-And the [INFO] paragraph below renders as a normal paragraph, not as a callout.
-So I went ahead and turned into a NOTE, though I wasn't sure if you wanted a TIP instead.
-
-////
-
-[NOTE]
+[TIP]
 ====
 Browsers follow the evolution of Unicode Emoji closely, and here no OS has a clear advantage.
 While preparing this chapter, I captured <<fig_zwj_sample>> on Ubuntu 19.10 and <<fig_emoji_families>> on Windows 10,
