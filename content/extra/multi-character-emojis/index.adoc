@@ -1,12 +1,21 @@
-[[multi_char_emoji_sec]]
-=== Multi-character emojis
+---
+title: "Building Mult-Character Emojis"
+date: 2021-07-03T18:57:00-03:00
+draft: false
+tags:
+- Unicode
+- emoji
+---
 
-As we saw in <<normalizing_unicode>>, it's always been possible to produce accented characters by combining Unicode letters and diacritics.
+[[multi_char_emoji_sec]]
+== Multi-character emojis
+
+Unicode has always supported building accented characters by combining letters and diacritics.
 To accommodate the growing demand for emojis,
 this idea has been extended to produce different pictographs by combining special markers and emoji characters.
 Let's start with the simplest kind of combined emoji: flags of countries.
 
-==== Country flags
+=== Country flags
 
 Throughout history, countries split, join, mutate or simply adopt new flags.
 The Unicode consortium found a way to avoid keeping up with those changes and outsource the problem to the systems that claim Unicode support:
@@ -72,7 +81,7 @@ Read https://blog.emojipedia.org/emoji-flags-explained/[Emoji Flags Explained] o
 
 Now let's see how emoji modifiers can be used to set the skin tone of emojis that show human faces, hands, noses etc.
 
-==== Skin tones
+=== Skin tones
 
 Unicode provides a set of 5 emoji modifiers to set skin tone from pale to dark brown.
 They are based on the https://en.wikipedia.org/wiki/Fitzpatrick_scale[Fitzpatrick scale]—developed
@@ -84,7 +93,7 @@ to study the effects of ultraviolet light on human skin.
 ====
 [source, python3]
 ----
-include::skin.py[]
+include::./content/extra/multi-character-emojis/skin.py[]
 ----
 ====
 <1> EMOJI MODIFIER FITZPATRICK TYPE-1-2 is the first modifier.
@@ -123,7 +132,7 @@ image::images/skin_demo.png[alt="Thumbs up emoji in 6 colors."]
 Let's now move to more complex emoji combinations using special markers.
 
 
-==== Rainbow flag and other ZWJ sequences
+=== Rainbow flag and other ZWJ sequences
 
 Besides the special purpose indicators and modifiers we've seen,
 Unicode provides a marker that is used as glue between emojis and other characters,
@@ -159,7 +168,7 @@ image::images/zwj_sample.png[alt="Making rainbow flag in console"]
 ====
 [source, python3]
 ----
-include::code/04-text-byte/zwj_sample.py[]
+include::./content/extra/multi-character-emojis/zwj_sample.py[]
 ----
 ====
 
