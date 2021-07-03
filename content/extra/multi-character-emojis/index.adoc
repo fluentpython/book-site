@@ -1,5 +1,5 @@
 ---
-title: "Building Mult-Character Emojis"
+title: "Building Multi-Character Emojis"
 date: 2021-07-03T18:57:00-03:00
 draft: false
 tags:
@@ -7,15 +7,12 @@ tags:
 - emoji
 ---
 
-[[multi_char_emoji_sec]]
-== Multi-character emojis
-
 Unicode has always supported building accented characters by combining letters and diacritics.
 To accommodate the growing demand for emojis,
 this idea has been extended to produce different pictographs by combining special markers and emoji characters.
 Let's start with the simplest kind of combined emoji: flags of countries.
 
-=== Country flags
+== Country flags
 
 Throughout history, countries split, join, mutate or simply adopt new flags.
 The Unicode consortium found a way to avoid keeping up with those changes and outsource the problem to the systems that claim Unicode support:
@@ -81,7 +78,7 @@ Read https://blog.emojipedia.org/emoji-flags-explained/[Emoji Flags Explained] o
 
 Now let's see how emoji modifiers can be used to set the skin tone of emojis that show human faces, hands, noses etc.
 
-=== Skin tones
+== Skin tones
 
 Unicode provides a set of 5 emoji modifiers to set skin tone from pale to dark brown.
 They are based on the https://en.wikipedia.org/wiki/Fitzpatrick_scale[Fitzpatrick scale]—developed
@@ -132,7 +129,7 @@ image::images/skin_demo.png[alt="Thumbs up emoji in 6 colors."]
 Let's now move to more complex emoji combinations using special markers.
 
 
-=== Rainbow flag and other ZWJ sequences
+== Rainbow flag and other ZWJ sequences
 
 Besides the special purpose indicators and modifiers we've seen,
 Unicode provides a marker that is used as glue between emojis and other characters,
@@ -226,7 +223,7 @@ because those were the OS/browser combinations with the most complete support fo
 ====
 
 
-=== Further Reading
+== Further Reading
 
 To learn more about Unicode Emoji standards, visit the https://unicode.org/emoji/techindex.html[Unicode Emoji] index page,
 which links to the https://unicode.org/reports/tr51/index.html[Technical Standard #51: Unicode Emoji] and the emoji data files,
@@ -248,4 +245,6 @@ The culture and politics of emoji evolution in the 2010-2019 decade are the subj
 Paddy Johnson's article https://gizmodo.com/emoji-we-lost-1841017375[Emoji We Lost] for Gizmodo.
 Matthew Rothenberg’s http://emojitracker.com/[emojitracker.com]
 is a live dashboard showing counts of emoji usage on Twitter, updated in real time.
-As I write this, FACE WITH TEARS OF JOY (U+1F602) is the most popular emoji on Twitter, with 2,693,102,686 recorded occurrences.
+As I write this, FACE WITH TEARS OF JOY (U+1F602) is the most popular emoji on Twitter, with
+3,313,667,315
+recorded occurrences.
