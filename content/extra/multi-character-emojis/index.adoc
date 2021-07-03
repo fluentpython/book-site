@@ -225,3 +225,27 @@ using Firefox 72 on both,
 because those were the OS/browser combinations with the most complete support for the emojis in those examples.
 ====
 
+
+=== Further Reading
+
+To learn more about Unicode Emoji standards, visit the https://unicode.org/emoji/techindex.html[Unicode Emoji] index page,
+which links to the https://unicode.org/reports/tr51/index.html[Technical Standard #51: Unicode Emoji] and the emoji data files,
+where you'll find https://unicode.org/Public/emoji/12.1/emoji-zwj-sequences.txt[emoji-zwj-sequences.txt]—the source of the samples I used in <<fig_zwj_sample>>.
+
+https://emojipedia.org/[Emojipedia] is the best site to find emojis and learn about them. Besides a comprehensive searchable database,
+Emojipedia also has a blog including posts
+like https://blog.emojipedia.org/emoji-zwj-sequences-three-letters-many-possibilities/[Emoji ZWJ Sequences: Three Letters, Many Possibilities]
+and https://blog.emojipedia.org/emoji-flags-explained/[Emoji Flags Explained].
+
+In 2016, the Museum of Modern Art (MoMA) in NYC added to its collection
+https://stories.moma.org/the-original-emoji-set-has-been-added-to-the-museum-of-modern-arts-collection-c6060e141f61[The Original Emoji],
+the 176 emojis designed by Shigetaka Kurita in 1999 for NTT DOCOMO—the Japanese mobile carrier.
+Going further back in history, Emojipedia published
+https://blog.emojipedia.org/correcting-the-record-on-the-first-emoji-set/[Correcting the Record on the First Emoji Set],
+crediting Japan's SoftBank for the earliest known emoji set, deployed in cell phones in 1997.
+SoftBank's set is the source of 90 emojis now in Unicode, including U+1F4A9 (PILE OF POO).
+The culture and politics of emoji evolution in the 2010-2019 decade are the subject of
+Paddy Johnson's article https://gizmodo.com/emoji-we-lost-1841017375[Emoji We Lost] for Gizmodo.
+Matthew Rothenberg’s http://emojitracker.com/[emojitracker.com]
+is a live dashboard showing counts of emoji usage on Twitter, updated in real time.
+As I write this, FACE WITH TEARS OF JOY (U+1F602) is the most popular emoji on Twitter, with 2,693,102,686 recorded occurrences.
