@@ -16,6 +16,7 @@ This post is split in four parts:
 . <<country_flags_sec>>
 . <<skin_sec>>
 . <<rainbow_sec>>
+. <<family_sec>>
 . <<further_sec>>
 
 [[country_flags_sec]]
@@ -117,7 +118,7 @@ image::images/skin_demo.png[alt="Thumbs up emoji in 6 colors."]
 Let's now move to more complex emoji combinations using special markers.
 
 [[rainbow_sec]]
-== Rainbow Flag and Modern Families
+== Rainbow Flag and ZWJ Combinations
 
 Besides the special purpose indicators and modifiers we've seen,
 Unicode provides an invisible marker used as glue between emojis and other characters,
@@ -152,8 +153,11 @@ include::./content/extra/multi-character-emojis/zwj_sample.py[]
 One trend in modern Unicode is the addition of gender-neutral emojis such as SWIMMER (U+1F3CA) or ADULT (U+1F9D1),
 which can then be shown as they are, or with different gender in ZWJ sequences with the female sign ♀ (U+2640) or the male sign ♂ (U+2642).
 
+[[family_sec]]
+== Modern Families
+
 The Unicode Consortium is also moving towards more diversity in the supported family emojis.
-<<fig_emoji_families>> is a matrix of family emojis showing current support for families with different combinations of parents and children—as of January 2020.
+<<fig_emoji_families>> is a matrix of family emojis showing support for families with different combinations of parents and children—as of January 2020.
 
 [[fig_emoji_families]]
 .The table shows adult singles and couples at the top, and boys and girls on the left-hand side. Cells have the combined emoji of a family with the parent(s) from the top and kid(s) from the left. If a combination is not supported by the browser, more than one emoji will appear inside a cell. Firefox 72 on Windows 10 is able to show all combinations.
@@ -161,8 +165,9 @@ image::images/emoji_families.png[alt="Matrix of emoji families"]
 
 The code I wrote to build <<fig_emoji_families>> uses the
 https://bottlepy.org/docs/dev/[Bottle framework]
-to build and serve an HTML page with that matrix of Unicode family emojis.
-You can see it in this site's https://github.com/fluentpython/book-site/blob/main/content/extra/multi-character-emojis/emoji_families.py[repository].
+to build and serve an HTML page with that matrix of family emojis.
+You can find https://github.com/fluentpython/book-site/blob/main/content/extra/multi-character-emojis/emoji_families.py[_emoji_families.py_]
+it in this site's public repository.
 
 To see the page, install https://pypi.org/project/bottle/[Bottle],
 run the _emoji_families.py_ script and visit http://localhost:8080/[http://localhost:8080/].
