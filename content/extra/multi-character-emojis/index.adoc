@@ -10,29 +10,25 @@ tags:
 Unicode has always supported building accented characters by combining letters and diacritics.
 To accommodate the growing demand for emojis,
 this idea has been extended to produce different pictographs by combining special markers and emoji characters.
-Let's start with the simplest kind of combined emoji: flags of countries.
 
+This post is split in four parts:
+
+. <<country_flags_sec>>
+. <<skin_sec>>
+. <<rainbow_sec>>
+. <<further_sec>>
+
+[[country_flags_sec]]
 == Country flags
 
 Throughout history, countries split, join, mutate or simply adopt new flags.
 The Unicode consortium found a way to avoid keeping up with those changes and outsource the problem to the systems that claim Unicode support:
 its character database has no country flags.
-Instead there is a set of 26 "regional indicator symbols letters", from A (U+1F1E6) to Z (U+1F1FF).
+Instead, there is a set of 26 "regional indicator symbols", corresponding to latin letters from A to Z with codes from U+1F1E6 to U+1F1FF."
 When you combine two of those indicator letters to form an ISO 3166-1 country code,
 you get the corresponding country flag—if the UI supports it.
 <<ex_two_flags>> shows how.
 
-////
-@@Leo
-
-The wikipedia page calls them "regional indicator symbols".
-I think you should drop the "letters" from "regional indicator symbols letters", or move it to the next part of the sentence:
-
-"Instead there is a set of 26 "regional indicator symbols", corresponding to alphabet letters from A (U+1F1E6) to Z (U+1F1FF)."
-
-Or "latin letters" instead of "alphabet letters".
-
-////
 
 [[ex_two_flags]]
 .two_flags.py: combining regional indicators to produce flags
@@ -67,18 +63,10 @@ However, instead of regional indicator letters, those flags require a more compl
 Read https://blog.emojipedia.org/emoji-flags-explained/[Emoji Flags Explained] on https://emojipedia.org/[Emojipedia] to learn how that works.
 ====
 
-////
-@@Leo
-
-"England, Scotland, and Wales may or may not be separate countries by the time you read this…"
-
-🤣🤣🤣
-
-////
-
 Now let's see how emoji modifiers can be used to set the skin tone of emojis that show human faces, hands, noses etc.
 
-== Skin tones
+[[skin_sec]]
+== Skin Tones
 
 Unicode provides a set of 5 emoji modifiers to set skin tone from pale to dark brown.
 They are based on the https://en.wikipedia.org/wiki/Fitzpatrick_scale[Fitzpatrick scale]—developed
@@ -128,8 +116,8 @@ image::images/skin_demo.png[alt="Thumbs up emoji in 6 colors."]
 
 Let's now move to more complex emoji combinations using special markers.
 
-
-== Rainbow flag and other ZWJ sequences
+[[rainbow_sec]]
+== Rainbow Flag and Other ZWJ Sequences
 
 Besides the special purpose indicators and modifiers we've seen,
 Unicode provides a marker that is used as glue between emojis and other characters,
@@ -168,20 +156,6 @@ image::images/zwj_sample.png[alt="Making rainbow flag in console"]
 include::./content/extra/multi-character-emojis/zwj_sample.py[]
 ----
 ====
-
-////
-@@Miro
-
-    while chars:
-        char = chars.pop(0)
-
-When I see this, I expect that there's another pop elsewhere in the block
-or that the pop should be in a condition and I re-read it several times to
-understand the intent. That's not the case, so it should be a single line:
-
-    for char in chars:
-
-////
 
 One trend in modern Unicode is the addition of gender-neutral emojis such as SWIMMER (U+1F3CA) or ADULT (U+1F9D1),
 which can then be shown as they are, or with different gender in ZWJ sequences with the female sign ♀ (U+2640) or the male sign ♂ (U+2642).
@@ -222,7 +196,7 @@ using Firefox 72 on both,
 because those were the OS/browser combinations with the most complete support for the emojis in those examples.
 ====
 
-
+[[further_sec]]
 == Further Reading
 
 To learn more about Unicode Emoji standards, visit the https://unicode.org/emoji/techindex.html[Unicode Emoji] index page,
@@ -237,12 +211,15 @@ and https://blog.emojipedia.org/emoji-flags-explained/[Emoji Flags Explained].
 In 2016, the Museum of Modern Art (MoMA) in NYC added to its collection
 https://stories.moma.org/the-original-emoji-set-has-been-added-to-the-museum-of-modern-arts-collection-c6060e141f61[The Original Emoji],
 the 176 emojis designed by Shigetaka Kurita in 1999 for NTT DOCOMO—the Japanese mobile carrier.
+
 Going further back in history, Emojipedia published
 https://blog.emojipedia.org/correcting-the-record-on-the-first-emoji-set/[Correcting the Record on the First Emoji Set],
 crediting Japan's SoftBank for the earliest known emoji set, deployed in cell phones in 1997.
 SoftBank's set is the source of 90 emojis now in Unicode, including U+1F4A9 (PILE OF POO).
+
 The culture and politics of emoji evolution in the 2010-2019 decade are the subject of
 Paddy Johnson's article https://gizmodo.com/emoji-we-lost-1841017375[Emoji We Lost] for Gizmodo.
+
 Matthew Rothenberg’s http://emojitracker.com/[emojitracker.com]
 is a live dashboard showing counts of emoji usage on Twitter, updated in real time.
 As I write this, FACE WITH TEARS OF JOY (U+1F602) is the most popular emoji on Twitter, with
