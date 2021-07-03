@@ -84,7 +84,7 @@ to study the effects of ultraviolet light on human skin.
 ====
 [source, python3]
 ----
-include::code/04-text-byte/skin.py[]
+include::skin.py[]
 ----
 ====
 <1> EMOJI MODIFIER FITZPATRICK TYPE-1-2 is the first modifier.
