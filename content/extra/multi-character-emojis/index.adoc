@@ -211,3 +211,13 @@ is a live dashboard showing counts of emoji usage on Twitter, updated in real ti
 As I write this, FACE WITH TEARS OF JOY (U+1F602) is the most popular emoji on Twitter, with
 3,313,667,315
 recorded occurrences.
+
+== Soapbox ==
+
+*The Power of Football*
+
+Why are England, Scotland, and Wales entitled to their own Unicode flags, but Catalonia, Pernambuco, and Texas are not?
+Because the first three are permanent members of the International Football Association Board which controls the rules of football.
+As such, they are allowed to enter their "national teams" in the FIFA World Cup—therefore
+media outlets need their flags to display tournament charts.
+At least that's my theory.
