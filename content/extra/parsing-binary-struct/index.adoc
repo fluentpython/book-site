@@ -1,0 +1,233 @@
+---
+title: "Parsing binary records with struct"
+date: 2021-07-05T21:27:18-03:00
+draft: false
+tags:
+- struct
+- binary
+- parsing
+- standard library
+---
+
+The `struct` module provides functions to parse fields of bytes into a tuple of Python objects,
+and to perform the opposite conversion, from a tuple into packed bytes.
+`struct` can be used with `bytes`, `bytearray`, and `memoryview` objects.
+
+The `struct` module is powerful and convenient, but before using it
+you should seriously consider alternatives, so that's the first short section in this post.
+
+Contents:
+
+. <<should_use_sec>>
+. <<intro_sec>>
+. <<struct_memview_sec>>
+
+[[should_use_sec]]
+== Should we use `struct`?
+
+Proprietary binary records in the real world are brittle and can be corrupted easily.
+The super simple example in <<intro_sec>> will expose one of many caveats:
+a string field may be limited only by its size in bytes,
+it may be padded by spaces,
+or it may contain a null-terminated string followed by random garbage up to a certain size.
+There is also the problem of endianness: the order of the bytes used to represent integers and floats,
+which depends on the CPU architecture.
+
+If you need to read or write from an existing binary format, I recommend trying
+to find a library that is ready to use instead of rolling your own solution.
+
+If you need to exchange binary data among in-company Python systems,
+the https://docs.python.org/3/library/pickle.html[_pickle_] module is the easiest way—but beware
+that different versions of Python use different binary formats by default,
+and reading a pickle may run arbitrary code, so it's not safe for external use.
+
+If the exchange involves programs in other languages, use JSON or a multi-platform binary serialization
+format like https://msgpack.org/[MessagePack] or https://developers.google.com/protocol-buffers[Protocol Buffers].
+
+
+[[intro_sec]]
+== Struct 101
+
+Suppose you need to read a binary file containing data about metropolitan areas, produced by a program in C with a record defined as <<ex_metro_struct_c>>
+
+[[ex_metro_struct_c]]
+.MetroArea: a struct in the C language.
+====
+[source, c]
+----
+struct MetroArea {
+    int year;
+    char name[12];
+    char country[2];
+    float population;
+};
+----
+====
+
+Here is how to read one record in that format, using `struct.unpack`:
+
+[[ex_metro_struct_console]]
+.Reading a C struct in the Python console.
+====
+[source, pycon]
+----
+>>> from struct import unpack, calcsize
+>>> FORMAT = 'i12s2sf'
+>>> size = calcsize(FORMAT)
+>>> data = open('metro_areas.bin', 'rb').read(size)
+>>> data
+b"\xe2\x07\x00\x00Tokyo\x00\xc5\x05\x01\x00\x00\x00JP\x00\x00\x11X'L"
+>>> unpack(FORMAT, data)
+(2018, b'Tokyo\x00\xc5\x05\x01\x00\x00\x00', b'JP', 43868228.0)
+----
+====
+
+Note how `unpack` returns a tuple with four fields, as specified by the `FORMAT` string.
+The letters and numbers in `FORMAT` are https://docs.python.org/3.8/library/struct.html#format-characters[Format Characters] described in the https://docs.python.org/3.8/library/struct.html[`struct`] module documentation.
+
+<<struct_format_tbl>> explains the elements of the format string from <<ex_metro_struct_console>>.
+
+[[struct_format_tbl]]
+.Parts of the format string `'i12s2sf'`.
+[options="header"]
+|============================================================================================
+| part | size     | C type     | Python type | limits to actual content
+|`i`   | 4 bytes  | `int`      | `int`       | 32 bits; range -2,147,483,648 to 2,147,483,647
+|`12s` | 12 bytes | `char[12]` | `bytes`     | length = 12
+|`2s`  | 2 bytes  | `char[2]`  | `bytes`     | length = 2
+|`f`   | 4 bytes  | `float`    | `float`     | 32-bits; approximante range ± 3.4×10^38^
+|============================================================================================
+
+One detail about the layout of `metro_areas.bin` is not clear from the code in <<ex_metro_struct_c>>:
+size is not the only difference between the `name` and `country` fields.
+The `country` field always holds a 2-letter country code,
+but `name` is a null-terminated sequence with up to 12 bytes including the terminating
+`b'\0'`—which you can see in <<ex_metro_struct_console>> right after the word
+`Tokyo`.footnote:[`\0` and `\x00` are two valid escape sequences for the null character, `chr(0)`, in a Python `str` or `bytes` literal.]
+
+Now let's review a script to extract all records from `metro_areas.bin` and produce a simple report like this:
+
+[source, bash]
+----
+$ python3 metro_read.py
+2018    Tokyo, JP       43,868,228
+2015    Shanghai, CN    38,700,000
+2015    Jakarta, ID     31,689,592
+----
+
+<<ex_metro_read>> showcases the handy `struct.iter_unpack` function.
+
+[[ex_metro_read]]
+.metro_read.py: list all records from `metro_areas.bin`
+====
+[source, python3]
+----
+include::./content/extra/parsing-binary-struct/metro_read.py[]
+----
+====
+<1> The `struct` format.
+<2> Utility function to decode and clean up the `bytes` fields; returns a `str`.footnote:[This is the first example using type hints in a function signature in this book. Simple type hints like these are quite readable and almost intuitive.]
+<3> Handle null-terminated C string: split once on `b'\0'`, then take the first part.
+<4> Decode `bytes` into `str`.
+<5> Open and read the whole file in binary mode; `data` is a `bytes` object.
+<6> `iter_unpack(…)` returns a generator that produces one tuple of fields for each sequence of bytes matching the format string.
+<7> The `name` and `country` fields need further processing by the `text` function.
+
+The `struct` module provides no way to specify null-terminated string fields.
+When processing a field like `name` in the example above,
+after unpacking we need to inspect the returned bytes to discard the first `b'\0'` and all bytes after it in that field.
+It is quite possible that bytes after the first `b'\0'` and up to the end of the field are garbage. You can actually see that in <<ex_metro_struct_console>>.
+
+
+Memory views can make it easier to experiment and debug programs using `struct`, as the next section explains.
+
+[[struct_memview_sec]]
+== Structs and Memory Views
+
+Python's `memoryview` type does not let you create or store byte sequences.
+Instead, it provides shared memory access to slices
+of data from other binary sequences, packed arrays,
+and buffers such as Python Imaging Library (PIL) images,footnote:[https://pillow.readthedocs.org/en/latest/[Pillow]
+is PIL's most active fork.] without copying the bytes.
+
+<<ex_memoryview_demo_2>> shows the use of `memoryview` and `struct` together to extract the width and height of a GIF image.
+
+[[ex_memoryview_demo_2]]
+.Using memoryview and struct to inspect a GIF image header
+====
+[source, pycon]
+----
+>>> import struct
+>>> fmt = '<3s3sHH'  # <1>
+>>> with open('filter.gif', 'rb') as fp:
+...     img = memoryview(fp.read())  # <2>
+...
+>>> header = img[:10]  # <3>
+>>> bytes(header)  # <4>
+b'GIF89a+\x02\xe6\x00'
+>>> struct.unpack(fmt, header)  # <5>
+(b'GIF', b'89a', 555, 230)
+>>> del header  # <6>
+>>> del img
+----
+====
+<1> `struct` format: `<` little-endian; `3s3s` two sequences of 3 bytes; `HH` two 16-bit integers.
+<2> Create `memoryview` from file contents in memory...
+<3> ...then another `memoryview` by slicing the first one; no bytes are copied here.
+<4> Convert to `bytes` for display only; 10 bytes are copied here.
+<5> Unpack `memoryview` into tuple of: type, version, width, and height.
+<6> Delete references to release the memory associated with the +memoryview+ instances.
+
+////
+@@Leo
+
+At marker <3>, instead of hardcoding 10 as in:
+
+    >>> header = img[:10]  # <3>
+
+We could do after marker <1>:
+
+    >>> fmt_len = struct.calcsize(fmt)
+
+Then at marker <3>:
+
+    >>> header = img[:fmt_len]  # <3>
+
+This way we can make sure we got the right number of bytes.
+
+Also, this example could be incremented with a small data class definition
+so as to explain that you could "*unpack" the tuple that comes out of `struct.unpack` into the data class invocation,
+if you want to combine the two:
+
+    @dataclass
+    class GifHeader:
+
+        identifier: bytes
+        version: bytes
+        width: int
+        height: int
+
+    gif_info = GifHeader(*struct.unpack(FORMAT, header))
+
+////
+
+Note that slicing a `memoryview` returns a new `memoryview`, without copying bytes.footnote:[
+Leonardo Rochael--one of the technical reviewers--pointed out that even less byte copying would happen
+if I used the `mmap` module to open the image as a memory-mapped file.
+That module is outside the scope of this book, but if you read and change binary files frequently,
+learning more about https://docs.python.org/3/library/mmap.html[`mmap` — Memory-mapped file support] will be very fruitful.]
+
+I will not go deeper into `memoryview` or the `struct` module,
+but if you work with binary data, you'll find it worthwhile to study their docs:
+http://bit.ly/1Vm7ZnI[Built-in Types » Memory Views] and http://bit.ly/1Vm7YjA[struct — Interpret bytes as packed binary data].
+
+////
+@@Jill
+
+"you'll find it worthwhile to study their docs"
+
+Can we point out any implications or efficiencies here for the reader? It sounds like this is a worthwhile pathway for them, but why?
+
+////
+
+
