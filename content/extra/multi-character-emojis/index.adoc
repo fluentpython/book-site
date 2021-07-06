@@ -8,10 +8,11 @@ tags:
 ---
 
 Unicode has always supported building accented characters by combining letters and diacritics.
-To accommodate the growing demand for emojis,
-this idea has been extended to produce different pictographs by combining special markers and emoji characters.
+This idea has been extended to meet the growing demand for emojis.
 
-Contents of this post:
+This post explains how to combine special markers and characters to make new pictographs.
+
+Contents:
 
 . <<country_flags_sec>>
 . <<skin_sec>>
@@ -207,7 +208,16 @@ The culture and politics of emoji evolution in the 2010-2019 decade are the subj
 Paddy Johnson's article https://gizmodo.com/emoji-we-lost-1841017375[Emoji We Lost] for Gizmodo.
 
 Matthew Rothenberg’s http://emojitracker.com/[emojitracker.com]
-is a live dashboard showing counts of emoji usage on Twitter, updated in real time.
-As I write this, FACE WITH TEARS OF JOY (U+1F602) is the most popular emoji on Twitter, with
-3,313,667,315
-recorded occurrences.
+is a live, real time dashboard that counts emoji usage on Twitter.
+As I write this on July 4, 2021, FACE WITH TEARS OF JOY (U+1F602) is the most popular emoji on Twitter, with
+3,314,598,733 recorded occurrences.
+
+== Soapbox
+
+=== The Power of Football
+
+Why are England, Scotland, and Wales entitled to their own Unicode flags, but Catalonia, Pernambuco, and Texas are not?
+Because the first three are permanent members of the International Football Association Board which controls the rules of football.
+As such, they are allowed to enter their "national teams" in the FIFA World Cup—therefore
+media outlets need their flags to display tournament charts.
+At least that's my unproven hypothesis.
