@@ -26,7 +26,7 @@ to render PDF, Mobi (Kindle), ePub, and custom HTML for the
 [O'Reilly Learning platform](https://learning.oreilly.com/library/view/fluent-python-2nd/9781492056348/).
 
 Unfortunately, rendering with AsciiDoctor+Hugo is different in many ways.
-I still have a [issues to fix](https://github.com/fluentpython/book-site/issues) to make this site pretty.
+I need to fix [some issues](https://github.com/fluentpython/book-site/issues) to make this site pretty.
 
 Help is welcome!
 Please write a comment to an [existing issue](https://github.com/fluentpython/book-site/issues)
