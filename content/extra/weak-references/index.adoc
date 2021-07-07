@@ -1,0 +1,169 @@
+---
+title: "Weak References"
+date: 2021-07-06T21:16:42-03:00
+draft: false
+tags:
+- standard library
+---
+
+=== Introduction
+
+The presence of references is what keeps an object alive in memory. When the reference count of an object reaches zero, the garbage collector disposes of it. But sometimes it is useful to have a reference to an object that does not keep it around longer than necessary. A common use case is a cache.
+
+Weak references to an object do not increase its reference count. The object that is the target of a reference is called the _referent_. Therefore, we say that a weak reference does not prevent the referent from being garbage collected.
+
+Weak references are useful in caching applications because you don't want the cached objects to be kept alive just because they are referenced by the cache.
+
+<<ex_weakref_ref>> shows how a `weakref.ref` instance can be called to reach its referent. If the object is alive, calling the weak reference returns it, otherwise `None` is returned.
+
+[TIP]
+====
+<<ex_weakref_ref>> is a console session, and the Python console automatically binds the `_` variable to the result of expressions that are not `None`. This interfered with my intended demonstration but also highlights a practical matter: when trying to micro-manage memory we are often surprised by hidden, implicit assignments that create new references to our objects. The `_` console variable is one example. Traceback objects are another common source of unexpected references.
+====
+
+////
+@@Jill
+
+(about the above TIP)
+
+This feels like it could be better addressed as inline text.
+
+Alternatively, the callout (TIP) could be stripped down to: The Python console automatically binds the _ variable to the result of expressions that are not None. This highlights a practical matter:....
+
+Personally, I like that you have additional context language built in and feel the reader would be best served with this information as a paragraph.
+
+@@Leo
+
+I didn't really understand what Jill meant above...
+
+If Jill meant doing the TIP as a regular paragraph and not a TIP,
+I disagree: I think it's fine as it is.
+
+"Traceback objects are another common source of unexpected references."
+
+The reader might not be familiar with traceback objects. Consider linking to:
+
+https://docs.python.org/3/reference/datamodel.html#traceback-objects
+
+The complications related to TB instances holding references to objects are related to the manipulation of `sys.exc_info()`
+or the `__traceback__` attribute of raised exceptions, things that rarely happen during normal Python coding,
+but when they do, they should be done with care.
+
+This is an important topic that veteran Python programers learn from getting burned, but for which it's hard to find good
+information.
+
+////
+
+[[ex_weakref_ref]]
+.A weak reference is a callable that returns the referenced object or None if the referent is no more
+====
+[source, pycon]
+----
+>>> import weakref
+>>> a_set = {0, 1}
+>>> wref = weakref.ref(a_set)  <1>
+>>> wref
+<weakref at 0x100637598; to 'set' at 0x100636748>
+>>> wref()  <2>
+{0, 1}
+>>> a_set = {2, 3, 4}  <3>
+>>> wref()  <4>
+{0, 1}
+>>> wref() is None  <5>
+False
+>>> wref() is None  <6>
+True
+----
+====
+<1> The `wref` weak reference object is created and inspected in the next line.
+<2> Invoking `wref()` returns the referenced object, `{0, 1}`. Because this is a console session, the result `{0, 1}` is bound to the `_` variable.
+<3> `a_set` no longer refers to the `{0, 1}` set, so its reference count is decreased. But the `_` variable still refers to it.
+<4> Calling `wref()` still returns `{0, 1}`.
+<5> When this expression is evaluated, `{0, 1}` lives, therefore `wref()` is not `None`. But `_` is then bound to the resulting value, `False`. Now there are no more strong references to `{0, 1}`.
+<6> Because the `{0, 1}` object is now gone, this last call to `wref()` returns `None`.
+
+The http://docs.python.org/3/library/weakref.html[`weakref` module documentation] makes the point that the `weakref.ref` class is actually a low-level interface intended for advanced uses, and that most programs are better served by the use of the `weakref` collections and `finalize`. In other words, consider using `WeakKeyDictionary`, `WeakValueDictionary`, `WeakSet`, and `finalize` (which use weak references internally) instead of creating and handling your own `weakref.ref` instances by hand. We just did that in <<ex_weakref_ref>> in the hope that showing a single `weakref.ref` in action could take away some of the mystery around them. But in practice, most of the time Python programs use the `weakref` collections.
+
+The next subsection briefly discusses the `weakref` collections.
+
+=== The WeakValueDictionary Skit
+
+The class `WeakValueDictionary` implements a mutable mapping where the values are weak references to objects. When a referred object is garbage collected elsewhere in the program, the corresponding key is automatically removed from `WeakValueDictionary`. This is commonly used for caching.
+
+Our demonstration of a `WeakValueDictionary` is inspired by the classic _Cheese Shop_ skit by Monty Python, in which a customer asks for more than 40 kinds of cheese, including cheddar and mozzarella, but none are in stock.footnote:[`cheeseshop.python.org` is also an alias for PyPI--the Python Package Index software repository--which started its life quite empty. At the time of this writing, the Python Cheese Shop has 314,556 packages.]
+
+<<ex_cheeseshop_class>> implements a trivial class to represent each kind of cheese.
+
+[[ex_cheeseshop_class]]
+.Cheese has a kind attribute and a standard representation
+====
+[source, py]
+----
+include::./content/extra/weak-references/cheese.py[tags=CHEESE_CLASS]
+----
+====
+
+In <<ex_cheeseshop_demo>>, each cheese is loaded from a `catalog` to a `stock` implemented as a `WeakValueDictionary`. However, all but one disappear from the `stock` as soon as the `catalog` is deleted. Can you explain why the Parmesan cheese lasts longer than the others?footnote:[Parmesan cheese is aged at least a year at the factory, so it is more durable than fresh cheese, but this is not the answer we are looking for.] The tip after the code has the answer.
+
+[[ex_cheeseshop_demo]]
+.Customer: "Have you in fact got any cheese here at all?"
+====
+[source, pycon]
+----
+>>> import weakref
+>>> stock = weakref.WeakValueDictionary()  <1>
+>>> catalog = [Cheese('Red Leicester'), Cheese('Tilsit'),
+...                 Cheese('Brie'), Cheese('Parmesan')]
+...
+>>> for cheese in catalog:
+...     stock[cheese.kind] = cheese  <2>
+...
+>>> sorted(stock.keys())
+['Brie', 'Parmesan', 'Red Leicester', 'Tilsit']  <3>
+>>> del catalog
+>>> sorted(stock.keys())
+['Parmesan']  <4>
+>>> del cheese
+>>> sorted(stock.keys())
+[]
+----
+====
+<1> `stock` is a `WeakValueDictionary`.
+<2> The `stock` maps the name of the cheese to a weak reference to the  cheese instance in the `catalog`.
+<3> The `stock` is complete.
+<4> After the `catalog` is deleted, most cheeses are gone from the `stock`, as expected in `WeakValueDictionary`. Why not all, in this case?
+
+[TIP]
+====
+A temporary variable may cause an object to last longer than expected by holding a reference to it. This is usually not a problem with local variables: they are destroyed when the function returns. But in <<ex_cheeseshop_demo>>, the `for` loop variable `cheese` is a global variable and will never go away unless explicitly deleted.
+====
+
+A counterpart to the `WeakValueDictionary` is the `WeakKeyDictionary` in which the keys are weak references. The http://bit.ly/1GsXB6Z[`weakref.WeakKeyDictionary` documentation] hints on possible uses:
+
+[quote]
+____
+[A `WeakKeyDictionary`] can be used to associate additional data with an object owned by other parts of an application without adding attributes to those objects. This can be especially useful with objects that override attribute accesses.
+____
+
+The `weakref` module also provides a `WeakSet`, simply described in the docs as "Set class that keeps weak references to its elements. An element will be discarded when no strong reference to it exists any more." If you need to build a class that is aware of every one of its instances, a good solution is to create a class attribute with a `WeakSet` to hold the references to the instances. Otherwise, if a regular `set` was used, the instances would never be garbage collected, because the class itself would have strong references to them, and classes live as long as the Python process unless you deliberately delete them.
+
+These collections, and weak references in general, are limited in the kinds of objects they can handle. The next section explains.
+
+=== Limitations of Weak References
+
+Not every Python object may be the target, or referent, of a weak reference. Basic `list` and `dict` instances may not be referents, but a plain subclass of either can solve this problem easily:
+
+[source, python3]
+----
+class MyList(list):
+    """list subclass whose instances may be weakly referenced"""
+
+a_list = MyList(range(10))
+
+# a_list can be the target of a weak reference
+wref_to_a_list = weakref.ref(a_list)
+----
+
+A `set` instance can be a referent, and that's why a `set` was used in <<ex_weakref_ref>>. User-defined types also pose no problem, which explains why the silly `Cheese` class was needed in <<ex_cheeseshop_demo>>. But `int` and `tuple` instances cannot be targets of weak references, even if subclasses of those types are created.
+
+Most of these limitations are implementation details of CPython that may not apply to other Python interpreters. They are the result of internal optimizations, some of which are discussed in the following section.
