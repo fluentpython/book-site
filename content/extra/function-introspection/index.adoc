@@ -291,8 +291,10 @@ In 1997, Bobo pioneered the object publishing concept: direct mapping from URLs 
 
 Bobo was created by Jim Fulton, later known as "The Zope Pope" thanks to his leading role in the development of the Zope framework, the foundation of the Plone CMS, SchoolTool, ERP5, and other large-scale Python projects. Jim is also the creator of ZODB--the Zope Object Database--a transactional object database that provides ACID (atomicity, consistency, isolation, and durability), designed for ease of use from Python.
 
-Bobo is the kernel of Zope. I was very glad when Zope was released because I wanted to use Bobo in my software development gigs,
-but it was not easy to sell projects using an unknown framework when its name is the Portuguese word for "fool".
+Bobo is the kernel of Zope.
+I was very glad when Zope was released in 1998 because I wanted to use Bobo in my software development gigs,
+but it was not easy to sell projects in Brazil using an obscure language named after a comedy troupe
+and unknown framework with a name that is the Portuguese word for "fool".
 Zope was also unknown, but it least the name was neutral. And it included ZODB, which made it impressive.
 
 Jim has since rewritten Bobo from scratch to support WSGI and modern Python (including Python 3).
