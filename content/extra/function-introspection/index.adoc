@@ -8,7 +8,15 @@ tags:
 - low-level
 ---
 
-== Function Introspection
+
+Contents:
+
+. <<intro>>
+. <<parameters>>
+. <<bobo>>
+
+[[intro]]
+== Introduction to Function Introspection
 
 Function objects have many attributes beyond `__doc__`. See what the `dir` function reveals about our `factorial`:
 
@@ -86,7 +94,7 @@ Computing the difference of two sets quickly gives us a list of the function-spe
 |`__qualname__`   |`str`           |The qualified function name, e.g., `Random.choice` (see https://www.python.org/dev/peps/pep-3155/[PEP-3155])
 |===========================
 
-
+[[parameters]]
 == Retrieving Information About Parameters
 
 An interesting application of function introspection can be found in the https://github.com/zopefoundation/bobo[Bobo HTTP micro-framework].
@@ -272,3 +280,19 @@ Proper runtime inspection of type hints is more complicated
 and not very well supported as of Python 3.9.
 ====
 
+[[bobo]]
+== Soapbox: About Bobo
+
+I started my Python career thanks to Bobo.
+I discovered it while looking for an object-oriented way to code Web applications, after trying Perl and Java alternatives.
+I used Bobo in my first Python Web project in 1998, an IT news portal called _IDG Now_—a Brazilian affiliate of the US-based media company _International Data Group_.
+
+In 1997, Bobo pioneered the object publishing concept: direct mapping from URLs to a hierarchy of objects, with no need to configure routes. I was hooked when I saw the beauty of this. Bobo also featured automatic HTTP query handling based on analysis of the signatures of the methods or functions used to handle requests.
+
+Bobo was created by Jim Fulton, later known as "The Zope Pope" thanks to his leading role in the development of the Zope framework, the foundation of the Plone CMS, SchoolTool, ERP5, and other large-scale Python projects. Jim is also the creator of ZODB--the Zope Object Database--a transactional object database that provides ACID (atomicity, consistency, isolation, and durability), designed for ease of use from Python.
+
+Bobo is the kernel of Zope. I was very glad when Zope was released because I wanted to use Bobo in my software development gigs,
+but it was not easy to sell projects using an unknown framework when its name is the Portuguese word for "fool".
+Zope was also unknown, but it least the name was neutral. And it included ZODB, which made it impressive.
+
+Jim has since rewritten Bobo from scratch to support WSGI and modern Python (including Python 3).
