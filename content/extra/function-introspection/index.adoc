@@ -1,0 +1,274 @@
+---
+title: "Introspection of Function Parameters"
+date: 2021-07-18T19:51:00-03:00
+draft: false
+tags:
+- function
+- introspection
+- low-level
+---
+
+== Function Introspection
+
+Function objects have many attributes beyond `__doc__`. See what the `dir` function reveals about our `factorial`:
+
+[source, pycon]
+----
+>>> dir(factorial)
+['__annotations__', '__call__', '__class__', '__closure__', '__code__',
+'__defaults__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__',
+'__format__', '__ge__', '__get__', '__getattribute__', '__globals__',
+'__gt__', '__hash__', '__init__', '__kwdefaults__', '__le__', '__lt__',
+'__module__', '__name__', '__ne__', '__new__', '__qualname__', '__reduce__',
+'__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__',
+'__subclasshook__']
+>>>
+----
+
+Most of these attributes are common to Python objects in general. In this section, we cover those that are especially relevant to treating functions as objects, starting with `__dict__`.
+
+Like the instances of a plain user-defined class,
+a function uses the `__dict__` attribute to store user attributes assigned to it. This is useful as a primitive form of annotation.
+Assigning arbitrary attributes to functions is not a very common practice in general, but Django is one framework that uses it.
+See, for example, the `short_description`, `boolean`, and `admin_order_field` attributes described in
+https://docs.djangoproject.com/en/stable/ref/contrib/admin#the-display-decorator[The Django admin site]
+documentation.
+In the Django docs, this example shows attaching a `short_description` to a method (among other attributes),
+to determine the description that will appear in record listings in the Django admin when that method is used:
+
+[source, python]
+----
+    def is_published(self, obj):
+        return obj.publish_date is not None
+    is_published.boolean = True
+    is_published.admin_order_field = '-publish_date'
+    is_published.short_description = 'Is Published?'
+----
+
+Now let us focus on the attributes that are specific to functions and are not found in a generic Python user-defined object.
+Computing the difference of two sets quickly gives us a list of the function-specific attributes (see <<func_attr_list>>).
+
+[[func_attr_list]]
+.Listing attributes of functions that don't exist in plain instances
+====
+[source, pycon]
+----
+>>> class C: pass  # <1>
+>>> obj = C()  # <2>
+>>> def func(): pass  # <3>
+>>> sorted(set(dir(func)) - set(dir(obj))) # <4>
+['__annotations__', '__call__', '__closure__', '__code__', '__defaults__',
+'__get__', '__globals__', '__kwdefaults__', '__name__', '__qualname__']
+>>>
+----
+====
+<1> Create bare user-defined class.
+<2> Make an instance of it.
+<3> Create a bare function.
+<4> Using set difference, generate a sorted list of the attributes that exist in a function but not in an instance of a bare class.
+
+<<function-attrs-table>> shows a summary of the attributes listed by <<func_attr_list>>.
+
+[[function-attrs-table]]
+.Attributes of user-defined functions
+[options="header"]
+|===========================
+|Name             |Type            |Description
+|`__annotations__`|`dict`          |Parameter and return type hints
+|`__call__`       |`method-wrapper`|Implementation of the `()` operator; a.k.a. the callable object protocol
+|`__closure__`    |`tuple`         |The function closure, i.e., bindings for free variables (often is `None`)
+|`__code__`       |`code`          |Function metadata and function body compiled into bytecode
+|`__defaults__`   |`tuple`         |Default values for the formal parameters
+|`__get__`        |`method-wrapper`|Implementation of the read-only descriptor protocol (see <<attribute_descriptors>>)
+|`__globals__`    |`dict`          |Reference to global variables of the module where the function is defined
+|`__kwdefaults__` |`dict`          |Default values for the keyword-only formal parameters
+|`__name__`       |`str`           |The function name
+|`__qualname__`   |`str`           |The qualified function name, e.g., `Random.choice` (see https://www.python.org/dev/peps/pep-3155/[PEP-3155])
+|===========================
+
+
+== Retrieving Information About Parameters
+
+An interesting application of function introspection can be found in the https://github.com/zopefoundation/bobo[Bobo HTTP micro-framework].
+To see that in action, consider a variation of the Bobo tutorial "Hello world" application in <<bobo_hello_ex>>.
+
+[NOTE]
+====
+I mention Bobo because it pioneered the use of parameter introspection to reduce boilerplate code in Python Web frameworks—since 1997!
+The practice is now common. https://fastapi.tiangolo.com/[FastAPI] is an example of a modern framework that uses the same idea.
+====
+
+[[bobo_hello_ex]]
+.Bobo knows that `hello` requires a person `argument`, and retrieves it from the HTTP request
+====
+[source, python3]
+----
+import bobo
+
+@bobo.query('/')
+def hello(person):
+    return f'Hello {person}!'
+----
+====
+
+////
+PROD: sometimes it is inevitable that a code listing will be split accross a page break.
+But with very short listings like this one, it looks really strange—it did happen at one point as I wrote.
+Can we avoid it, just for the short listings? Thanks!
+////
+
+The `bobo.query` decorator integrates a plain function such as `hello` with the request handling machinery of the framework. We'll cover decorators in <<closures_and_decorators>>—that's not the point of this example here. The point is that Bobo introspects the `hello` function and finds out it needs one parameter named `person` to work, and it will retrieve a parameter with that name from the request and pass it to `hello`, so the programmer doesn't need deal with request object directly. This also makes unit testing easier: there is no need to mock the request object to test the `hello` function.
+
+If you install Bobo and point its development server to the script in <<bobo_hello_ex>> (e.g., `bobo -f hello.py`), a hit on the URL `http://localhost:8080/` will produce the message "Missing form variable person" with a 403 HTTP code. This happens because Bobo understands that the `person` argument is required to call `hello`, but no such name was found in the request. <<bobo_hello_error>> is a shell session using `curl` to show this behavior.
+
+[[bobo_hello_error]]
+.Bobo issues a 403 forbidden response if there are missing function arguments in the request; curl -i dumps the headers to standard output
+====
+[source, bash]
+----
+$ curl -i http://localhost:8080/
+HTTP/1.0 403 Forbidden
+Date: Mon, 31 May 2021 16:34:19 GMT
+Server: WSGIServer/0.2 CPython/3.9.5
+Content-Type: text/html; charset=UTF-8
+Content-Length: 103
+
+<html>
+<head><title>Missing parameter</title></head>
+<body>Missing form variable person</body>
+</html>
+----
+====
+
+However, if you get `http://localhost:8080/?person=Jim`, the response will be the string `'Hello Jim!'`. See <<bobo_hello_ok>>.
+
+[[bobo_hello_ok]]
+.Passing the person parameter is required for an OK response
+====
+[source, bash]
+----
+$ curl -i http://localhost:8080/?person=Jim
+HTTP/1.0 200 OK
+Date: Mon, 31 May 2021 16:35:40 GMT
+Server: WSGIServer/0.2 CPython/3.9.5
+Content-Type: text/html; charset=UTF-8
+Content-Length: 10
+
+Hello Jim!
+----
+====
+
+How does Bobo know which parameter names are required by the function, and whether they have default values or not?
+
+Within a function object, the `__defaults__` attribute holds a tuple with the
+default values of positional and keyword arguments.
+The defaults for keyword-only arguments appear in `__kwdefaults__`.
+The names of the arguments, however, are found within the `__code__` attribute,
+which is a reference to a `code` object with many attributes of its own.
+
+To demonstrate the use of these attributes, we will inspect the function `clip` listed in <<ex_clip>>.
+The `clip` function tries to break a string of text at a space, making `len(result) <= max_len`, if possible.
+The doctests for _clip.py_ at the
+https://github.com/fluentpython/example-code-2e/blob/master/07-1class-func/clip.py[example code repository]
+illustrate how it works.
+Here we are more concerned with the function signature than its body.
+
+[[ex_clip]]
+.Shorten string by clipping at space near the desired length.
+====
+[source, py]
+----
+include::./content/extra/function-introspection/clip.py[tags=CLIP]
+----
+====
+
+<<ex_clip_introspection>> shows the values of `__defaults__`, `__code__.co_varnames`, and `__code__.co_argcount` for the `clip` function listed in <<ex_clip>>.
+
+[[ex_clip_introspection]]
+.Extracting information about the function arguments
+====
+[source, pycon]
+----
+include::./content/extra/function-introspection/clip_introspection.rst[]
+----
+====
+
+As you can see, this is not the most convenient arrangement of information. The argument names appear in `__code__.co_varnames`, but that also includes the names of the local variables created in the body of the function. Therefore, the argument names are the first N strings, where N is given by `__code__.co_argcount` which--by the way--does not include any variable arguments prefixed with `*` or `**`. The default values are identified only by their position in the `__defaults__` tuple, so to link each with the respective argument, you have to scan from last to first. In the example, we have two arguments, `text` and `max_len`, and one default, `80`, so it must belong to the last argument, `max_len`. This is awkward.
+
+Fortunately, there is a better way: the `inspect` module.
+
+Take a look at <<ex_clip_signature1>>.
+
+[[ex_clip_signature1]]
+.Extracting the function signature
+====
+[source, pycon]
+----
+include::./content/extra/function-introspection/clip_signature.rst[]
+----
+====
+
+This is much better. `inspect.signature` returns an `inspect.Signature` object, which has a `parameters` attribute that lets you read an ordered mapping of names to `inspect.Parameter` objects. Each `Parameter` instance has attributes such as `name`, `default`, and `kind`. The special value `inspect._empty` denotes parameters with no default, which makes sense considering that `None` is a valid--and popular--default value.
+
+The `kind` attribute holds one of five possible values from the `_ParameterKind` class:
+
+`POSITIONAL_OR_KEYWORD`:: A parameter that may be passed as a positional or as a keyword argument (most Python function parameters are of this kind).
+
+`VAR_POSITIONAL`:: A `tuple` of positional parameters.
+
+`VAR_KEYWORD`:: A `dict` of keyword parameters.
+
+`KEYWORD_ONLY`:: A keyword-only parameter (new in Python 3).
+
+`POSITIONAL_ONLY`:: A positional-only parameter; unsupported by function declaration syntax before Python 3.8, but exemplified by existing functions implemented in C--like `divmod`&#x2014;that do not accept parameters passed by keyword.
+
+Besides `name`, `default`, and `kind`, `inspect.Parameter` objects have an `annotation` attribute that is usually `inspect._empty` but may contain function signature metadata provided via the new annotations syntax in Python 3—covered in <<type_hints_in_def_ch>>.
+
+An `inspect.Signature` object has a `bind` method that takes any number of arguments and binds them to the parameters in the signature, applying the usual rules for matching actual arguments to formal parameters. This can be used by a framework to validate arguments prior to the actual function invocation. <<ex_clip_signature>> shows how.
+
+[[ex_clip_signature]]
+.Binding the function signature from the tag function in <<tagger_ex>> to a dict of arguments
+====
+[source, pycon]
+----
+>>> import inspect
+>>> sig = inspect.signature(tag)  <1>
+>>> my_tag = {'name': 'img', 'title': 'Sunset Boulevard',
+...           'src': 'sunset.jpg', 'class_': 'framed'}
+>>> bound_args = sig.bind(**my_tag)  <2>
+>>> bound_args
+<BoundArguments (name='img', class_='framed',
+  attrs={'title': 'Sunset Boulevard', 'src': 'sunset.jpg'})>  <3>
+>>> for name, value in bound_args.arguments.items():  <4>
+...     print(name, '=', value)
+...
+name = img
+class_ = framed
+attrs = {'title': 'Sunset Boulevard', 'src': 'sunset.jpg'}
+>>> del my_tag['name']  <5>
+>>> bound_args = sig.bind(**my_tag)  <6>
+Traceback (most recent call last):
+  ...
+TypeError: missing a required argument: 'name'
+----
+====
+<1> Get the signature from `tag` function in <<tagger_ex>>.
+<2> Pass a `dict` of arguments to `.bind()`.
+<3> An `inspect.BoundArguments` object is produced (line break added to fit in e-book).
+<4> Iterate over the items in `bound_args.arguments`, which is a `dict`, to display the names and values of the arguments.
+<5> Remove the mandatory argument `name` from `my_tag`.
+<6> Calling `sig.bind(**my_tag)` raises a `TypeError` complaining of the missing `name` parameter.
+
+This example shows how the Python Data Model, with the help of `inspect`,
+exposes the same machinery the interpreter uses to
+bind arguments to formal parameters in function calls.
+Frameworks and tools like IDEs can use this information to validate code.
+
+
+[WARNING]
+====
+The `inspect` module predates PEP 484—Type Hints.
+Proper runtime inspection of type hints is more complicated
+and not very well supported as of Python 3.9.
+====
+
