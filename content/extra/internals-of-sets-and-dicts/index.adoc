@@ -10,6 +10,13 @@ tags:
 
 Understand how Python dictionaries and sets are built with hash tables to make sense of their strengths and limitations.
 
+Here are some questions this article answers:
+
+* How efficient are Python `dict` and `set`?
+* Why are `set` elements unordered?
+* Why can't we use any Python object as a `dict` key or `set` element?
+* Why does the order of the `dict` keys depend on insertion order?
+
 Contents:
 
 * <<perf_experim_sec>>
@@ -28,13 +35,6 @@ You don't need to know all of these details to make good use of dictionaries and
 But the implementation ideas are beautiful—that's why I describe them.
 For practical advice, you can skip to <<consequences_set_sec>> and <<consequences_dict_sec>>.
 =====
-
-Here are some questions this article answers:
-
-* How efficient are Python `dict` and `set`?
-* Why are `set` elements unordered?
-* Why can't we use any Python object as a `dict` key or `set` element?
-* Why does the order of the `dict` keys depend on insertion order?
 
 To motivate the study of hash tables, we start by showcasing the amazing performance of `dict` and `set` with a simple test involving millions of items.
 
