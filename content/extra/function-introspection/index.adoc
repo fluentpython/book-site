@@ -18,24 +18,37 @@ Contents:
 [[intro]]
 == Introduction to Function Introspection
 
-Function objects have many attributes beyond `+__doc__+`.
-See what the `dir` function reveals about `factorial`:
+Python functions are full-fledged objects.
+As such, they have attributes, such as `+__doc__+`:
 
 [source, pycon]
 ----
->>> def factorial(n):  <1>
+>>> def factorial(n):
 ...     """returns n!"""
 ...     return 1 if n < 2 else n * factorial(n - 1)
 ...
+>>> factorial.__doc__
+'returns n!'
+----
+
+Invoking `help(factorial)` on the Python console shows the
+function signature and the `+__doc__+` text.
+
+Functions have many attributes beyond `+__doc__+`.
+Here's what the `dir` function reveals about `factorial`:
+
+[source, pycon]
+----
 >>> dir(factorial)
-['__annotations__', '__call__', '__class__', '__closure__', '__code__',
-'__defaults__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__',
-'__format__', '__ge__', '__get__', '__getattribute__', '__globals__',
-'__gt__', '__hash__', '__init__', '__kwdefaults__', '__le__', '__lt__',
-'__module__', '__name__', '__ne__', '__new__', '__qualname__', '__reduce__',
-'__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__',
-'__subclasshook__']
->>>
+['__annotations__', '__builtins__', '__call__', '__class__',
+'__closure__', '__code__', '__defaults__', '__delattr__',
+'__dict__', '__dir__', '__doc__', '__eq__', '__format__',
+'__ge__', '__get__', '__getattribute__', '__globals__',
+'__gt__', '__hash__', '__init__', '__init_subclass__',
+'__kwdefaults__', '__le__', '__lt__', '__module__',
+'__name__', '__ne__', '__new__', '__qualname__',
+'__reduce__', '__reduce_ex__', '__repr__', '__setattr__',
+'__sizeof__', '__str__', '__subclasshook__']
 ----
 
 Most of these attributes are common to Python objects in general.
@@ -87,17 +100,17 @@ Computing the difference of two sets quickly gives us a list of the function-spe
 .Attributes of user-defined functions
 [options="header"]
 |===========================
-|Name               |Type            |Description
-|`+__annotations__+`|`dict`          |Parameter and return type hints
-|`__call__`         |`method-wrapper`|Implementation of the `()` operator; a.k.a. the callable object protocol
-|`__closure__`      |`tuple`         |The function closure, i.e., bindings for free variables (often is `None`)
-|`__code__`         |`code`          |Function metadata and function body compiled into bytecode
-|`__defaults__`     |`tuple`         |Default values for the formal parameters
-|`__get__`          |`method-wrapper`|Implementation of the read-only descriptor protocol (see <<attribute_descriptors>>)
-|`__globals__`      |`dict`          |Reference to global variables of the module where the function is defined
-|`__kwdefaults__`   |`dict`          |Default values for the keyword-only formal parameters
-|`__name__`         |`str`           |The function name
-|`__qualname__`     |`str`           |The qualified function name, e.g., `Random.choice` (see https://www.python.org/dev/peps/pep-3155/[PEP-3155])
+|Name               |Type     |Description
+|`+__annotations__+`|`dict`   |Parameter and return type hints
+|`+__call__+`       |`method` |Implementation of the `()` operator; a.k.a. the callable object protocol
+|`+__closure__+`    |`tuple`  |The function closure, i.e., bindings for free variables (often is `None`)
+|`+__code__+`       |`code`   |Function metadata and function body compiled into bytecode
+|`+__defaults__+`   |`tuple`  |Default values for the formal parameters
+|`+__get__+`        |`method` |Implementation of the read-only descriptor protocol (see <<attribute_descriptors>>)
+|`+__globals__+`    |`dict`   |Reference to global variables of the module where the function is defined
+|`+__kwdefaults__+` |`dict`   |Default values for the keyword-only formal parameters
+|`+__name__+`       |`str`    |The function name
+|`+__qualname__+`   |`str`    |The qualified function name, e.g., `Random.choice` (see https://www.python.org/dev/peps/pep-3155/[PEP-3155])
 |===========================
 
 [[parameters]]
@@ -124,12 +137,6 @@ def hello(person):
     return f'Hello {person}!'
 ----
 ====
-
-////
-PROD: sometimes it is inevitable that a code listing will be split accross a page break.
-But with very short listings like this one, it looks really strange—it did happen at one point as I wrote.
-Can we avoid it, just for the short listings? Thanks!
-////
 
 The `bobo.query` decorator integrates a plain function such as `hello` with the request handling machinery of the framework. We'll cover decorators in <<closures_and_decorators>>—that's not the point of this example here. The point is that Bobo introspects the `hello` function and finds out it needs one parameter named `person` to work, and it will retrieve a parameter with that name from the request and pass it to `hello`, so the programmer doesn't need deal with request object directly. This also makes unit testing easier: there is no need to mock the request object to test the `hello` function.
 
@@ -196,7 +203,7 @@ include::./content/extra/function-introspection/clip.py[tags=CLIP]
 ----
 ====
 
-<<ex_clip_introspection>> shows the values of `__defaults__`, `__code__.co_varnames`, and `__code__.co_argcount` for the `clip` function listed in <<ex_clip>>.
+<<ex_clip_introspection>> shows the values of `+__defaults__+`, `+__code__.co_varnames+`, and `+__code__.co_argcount+` for the `clip` function listed in <<ex_clip>>.
 
 [[ex_clip_introspection]]
 .Extracting information about the function arguments
@@ -207,7 +214,7 @@ include::./content/extra/function-introspection/clip_introspection.rst[]
 ----
 ====
 
-As you can see, this is not the most convenient arrangement of information. The argument names appear in `__code__.co_varnames`, but that also includes the names of the local variables created in the body of the function. Therefore, the argument names are the first N strings, where N is given by `__code__.co_argcount` which--by the way--does not include any variable arguments prefixed with `*` or `**`. The default values are identified only by their position in the `__defaults__` tuple, so to link each with the respective argument, you have to scan from last to first. In the example, we have two arguments, `text` and `max_len`, and one default, `80`, so it must belong to the last argument, `max_len`. This is awkward.
+As you can see, this is not the most convenient arrangement of information. The argument names appear in `+__code__.co_varnames+`, but that also includes the names of the local variables created in the body of the function. Therefore, the argument names are the first N strings, where N is given by `+__code__.co_argcount+` which--by the way--does not include any variable arguments prefixed with `*` or `**`. The default values are identified only by their position in the `+__defaults__+` tuple, so to link each with the respective argument, you have to scan from last to first. In the example, we have two arguments, `text` and `max_len`, and one default, `80`, so it must belong to the last argument, `max_len`. This is awkward.
 
 Fortunately, there is a better way: the `inspect` module.
 
