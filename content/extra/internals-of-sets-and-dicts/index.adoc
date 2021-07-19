@@ -15,7 +15,7 @@ tags:
 ** <<consequences_set_sec>>
 * <<hash_table_in_dict_sec>>
 ** <<key_sharing_dict_sec>>
-** <<how_compact_dict_ordering_sec>> 
+** <<how_compact_dict_ordering_sec>>
 ** <<consequences_dict_sec>>
 
 Understanding how Python dictionaries and sets are built with hash tables is helpful to make sense of their strengths and limitations.
@@ -126,7 +126,7 @@ Before studying hash tables, we need to know more about hash codes, and how they
 [[hashes_and_equality]]
 == Hashes and equality
 
-The `hash()` built-in function works directly with built-in types and falls back to calling `__hash__` for user-defined types. If two objects compare equal, their hash codes must also be equal, otherwise the hash table algorithm does not work. For example, because `1 == 1.0` is `True`, `hash(1) == hash(1.0)` must also be `True`, even though the internal representation of an `int` and a `float` are very different.footnote:[Since I just mentioned `int`, here is a CPython implementation detail: the hash code of an `int` that fits in a machine word is the value of the `int` itself, except the hash code of -1, which is -2.]
+The `hash()` built-in function works directly with built-in types and falls back to calling `+__hash__+` for user-defined types. If two objects compare equal, their hash codes must also be equal, otherwise the hash table algorithm does not work. For example, because `1 == 1.0` is `True`, `hash(1) == hash(1.0)` must also be `True`, even though the internal representation of an `int` and a `float` are very different.footnote:[Since I just mentioned `int`, here is a CPython implementation detail: the hash code of an `int` that fits in a machine word is the value of the `int` itself, except the hash code of -1, which is -2.]
 
 Also, to be effective as hash table indexes, hash codes should scatter around the index space as much as possible. This means that, ideally, objects that are similar but not equal should have hash codes that differ widely. <<ex_hashdiff_output>> is the output of a script to compare the bit patterns of hash codes. Note how the hashes of 1 and 1.0 are the same, but those of 1.0001, 1.0002, and 1.0003 are very different.
 
@@ -310,7 +310,7 @@ Incrementing the index after a collision is called _linear probing_. This can le
 .Hash table for the set `{'Mon', 'Tue', 'Wed', 'Thu', 'Fri'}`. It is now 62.5% full—close to the ⅔ threshold.
 image::images/hash-table-5.png[alt="Hash table with elements 'Mon' through 'Fri'."]
 
-When there is an element in the probed bucket and the hash codes match, Python also needs to compare the actual object values. That's because, as explained in <<hash_collisions>>, it's possible that two different objects have the same hash code—although that's rare for strings, thanks to the quality of the Siphash algorithmfootnote:[On 64-bit CPython, string hash collisions are so uncommon that I was unable to produce an example for this explanation. If you find one, let me know.]. This explains why hashable objects must implement both `__hash__` and `__eq__`.
+When there is an element in the probed bucket and the hash codes match, Python also needs to compare the actual object values. That's because, as explained in <<hash_collisions>>, it's possible that two different objects have the same hash code—although that's rare for strings, thanks to the quality of the Siphash algorithmfootnote:[On 64-bit CPython, string hash collisions are so uncommon that I was unable to produce an example for this explanation. If you find one, let me know.]. This explains why hashable objects must implement both `+__hash__+` and `+__eq__+`.
 
 If a new element were added to our example hash table, it would be more than ⅔ full, therefore increasing the chances of index collisions. To prevent that, Python would allocate a new hash table with 16 buckets, and reinsert all elements there.
 
@@ -357,7 +357,7 @@ otherwise, when both the hash code and the values of the sought element match an
 
 The `set` and `frozenset` types are both implemented with a hash table, which has these effects:
 
-* Set elements must be hashable objects. They must implement proper `__hash__` and `__eq__` methods as described in <<what_is_hashable>>.
+* Set elements must be hashable objects. They must implement proper `+__hash__+` and `+__eq__+` methods as described in <<what_is_hashable>>.
 * Membership testing is very efficient. A set may have millions of elements, but the bucket for an element can be located directly by computing the hash code of the element and deriving an index offset, with the possible overhead of a small number of probes to find a matching element or an empty bucket.
 * Sets have a significant memory overhead. The most compact internal data structure for a container would be an array of pointersfootnote:[That's how tuples are stored.]. Compared to that, a hash table adds a hash code per entry, and at least ⅓ of empty buckets to minimize collisions.
 * Element ordering depends on insertion order, but not in a useful or reliable way. If two elements are involved in a collision, the bucket were each is stored depends on which element is added first.
@@ -513,16 +513,18 @@ I omitted many details, but now let's take a look at the other space-saving opti
 [[key_sharing_dict_sec]]
 === Key-sharing dictionary
 
-Instances of user-defined classes usually hold their attributes in a `__dict__`
-attribute which is a regular dictionaryfootnote:[Unless the class has a `__slots__` attribute, as we'll see in chapter XXX].
-In an instance `__dict__`, the keys are the attribute names, and the values are the attribute values.
+Instances of user-defined classes hold their attributes in a `+__dict__+`
+attributefootnote:[Unless the class has a
+https://docs.python.org/3/reference/datamodel.html#slots[`+__slots__+`] attribute.]
+which is a regular dictionary.
+An instance `+__dict__+` maps attribute names to attribute values.
 Most of the time, all instances have the same attributes with different values.
 When that happens, 2 of the 3 fields in the `entries` table for every instance have the exact same content:
 the hash code of the attribute name, and a pointer to the attribute name.
 Only the pointer to the attribute value is different.
 
 In https://www.python.org/dev/peps/pep-0412/[PEP 412 — Key-Sharing Dictionary],
-Mark Shannon proposed to split the storage of dictionaries used as instance `__dict__`,
+Mark Shannon proposed to split the storage of dictionaries used as instance `+__dict__+`,
 so that each attribute hash code and pointer is stored only once, linked to the class,
 and the attribute values are kept in parallel arrays of pointers attached to each instance.
 
@@ -532,30 +534,29 @@ Given a `Movie` class where all instances have the same attributes named
 dictionary—also implemented with the new compact layout.
 
 [[fig_hash_table_dict_split]]
-.Split storage for the `__dict__` of a class and three instances.
-image::images/hash-table-split.png[alt="Arrays for split `__dict__` with 3 instances."]
+.Split storage for the `+__dict__+` of a class and three instances.
+image::images/hash-table-split.png[alt="Arrays for split `+__dict__+` with 3 instances."]
 
 PEP 412 introduced the terms _combined-table_ to discuss the old layout and _split-table_ for the proposed optimization.
 
 The combined-table layout is still the default when you create a `dict` using literal syntax or call `dict()`.
-A split-table dictionary is created to fill the `__dict__` special attribute of an instance, when it is the first instance of a class.
+A split-table dictionary is created to fill the `+__dict__+` special attribute of an instance, when it is the first instance of a class.
 The keys table (see <<fig_hash_table_dict_split>>) is then cached in the class object.
-This leverages the fact that most Object Oriented Python code assigns all instance attributes in the `__init__` method.
+This leverages the fact that most Object Oriented Python code assigns all instance attributes in the `+__init__+` method.
 That first instance (and all instances after it) will hold only its own value array.
-If an instance gets a new attribute not found in the shared keys table, then this instance's `__dict__` is converted to combined-table form.
-However, if this instance is the only one in its class, the `__dict__` is converted back to split-table,
+If an instance gets a new attribute not found in the shared keys table, then this instance's `+__dict__+` is converted to combined-table form.
+However, if this instance is the only one in its class, the `+__dict__+` is converted back to split-table,
 since it is assumed that further instances will have the same set of attributes and key sharing will be useful.
 
 The `PyDictObject` struct that represents a `dict` in the CPython source code is the same for both _combined-table_ and _split-table_ dictionaries.
 When a `dict` converts from one layout to the other, the change happens in `PyDictObject` fields,
 with the help of other internal data structures.
 
-
 [[consequences_dict_sec]]
 === Practical Consequences of How dict Works
 
-* Keys must be hashable objects. They must implement proper `__hash__` and `__eq__` methods as described in <<what_is_hashable>>.
+* Keys must be hashable objects. They must implement proper `+__hash__+` and `+__eq__+` methods as described in <<what_is_hashable>>.
 * Key searches are nearly as fast as element searches in sets.
 * Item ordering is preserved in the `entries` table—this was implemented in CPython 3.6, and became an official language feature in 3.7.
-* To save memory, avoid creating instance attributes outside of the `__init__` method. If all instance attributes are created in `__init__`,
-the `__dict__` of your instances will use the split-table layout, sharing the same indices and key entries array stored with the class.
+* To save memory, avoid creating instance attributes outside of the `+__init__+` method. If all instance attributes are created in `+__init__+`,
+the `+__dict__+` of your instances will use the split-table layout, sharing the same indices and key entries array stored with the class.

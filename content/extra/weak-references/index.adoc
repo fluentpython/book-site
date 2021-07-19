@@ -21,39 +21,6 @@ Weak references are useful in caching applications because you don't want the ca
 <<ex_weakref_ref>> is a console session, and the Python console automatically binds the `_` variable to the result of expressions that are not `None`. This interfered with my intended demonstration but also highlights a practical matter: when trying to micro-manage memory we are often surprised by hidden, implicit assignments that create new references to our objects. The `_` console variable is one example. Traceback objects are another common source of unexpected references.
 ====
 
-////
-@@Jill
-
-(about the above TIP)
-
-This feels like it could be better addressed as inline text.
-
-Alternatively, the callout (TIP) could be stripped down to: The Python console automatically binds the _ variable to the result of expressions that are not None. This highlights a practical matter:....
-
-Personally, I like that you have additional context language built in and feel the reader would be best served with this information as a paragraph.
-
-@@Leo
-
-I didn't really understand what Jill meant above...
-
-If Jill meant doing the TIP as a regular paragraph and not a TIP,
-I disagree: I think it's fine as it is.
-
-"Traceback objects are another common source of unexpected references."
-
-The reader might not be familiar with traceback objects. Consider linking to:
-
-https://docs.python.org/3/reference/datamodel.html#traceback-objects
-
-The complications related to TB instances holding references to objects are related to the manipulation of `sys.exc_info()`
-or the `__traceback__` attribute of raised exceptions, things that rarely happen during normal Python coding,
-but when they do, they should be done with care.
-
-This is an important topic that veteran Python programers learn from getting burned, but for which it's hard to find good
-information.
-
-////
-
 [[ex_weakref_ref]]
 .A weak reference is a callable that returns the referenced object or None if the referent is no more
 ====
@@ -138,7 +105,9 @@ In <<ex_cheeseshop_demo>>, each cheese is loaded from a `catalog` to a `stock` i
 A temporary variable may cause an object to last longer than expected by holding a reference to it. This is usually not a problem with local variables: they are destroyed when the function returns. But in <<ex_cheeseshop_demo>>, the `for` loop variable `cheese` is a global variable and will never go away unless explicitly deleted.
 ====
 
-A counterpart to the `WeakValueDictionary` is the `WeakKeyDictionary` in which the keys are weak references. The http://bit.ly/1GsXB6Z[`weakref.WeakKeyDictionary` documentation] hints on possible uses:
+A counterpart to the `WeakValueDictionary` is the `WeakKeyDictionary` in which the keys are weak references. The
+https://docs.python.org/3/library/weakref.html?highlight=weakref#weakref.WeakKeyDictionary[`weakref.WeakKeyDictionary` documentation]
+hints on possible uses:
 
 [quote]
 ____

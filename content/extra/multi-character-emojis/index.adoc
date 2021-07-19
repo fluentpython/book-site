@@ -5,6 +5,7 @@ draft: false
 tags:
 - Unicode
 - emoji
+- high-level
 ---
 
 Unicode has always supported building accented characters by combining letters and diacritics.

@@ -7,6 +7,7 @@ tags:
 - sort
 - bisect
 - standard library
+- high-level
 ---
 
 The `bisect` module offers two main functions that use the binary search algorithm to quickly find and insert items in any sorted sequence.
@@ -17,7 +18,7 @@ The `bisect` module offers two main functions that use the binary search algorit
 [[searching_sec]]
 == Searching with `bisect`
 
-`bisect(haystack, needle)` does a binary search for `needle` in ++haystack++—which must be a sorted sequence--to locate the position where `needle` can be inserted while maintaining `haystack` in ascending order.
+`bisect(haystack, needle)` does a binary search for `needle` in ++haystack++—which must be a sorted sequence—to locate the position where `needle` can be inserted while maintaining `haystack` in ascending order.
 In other words, all items appearing up to that position are less than or equal to `needle`.
 You could use the result of `bisect(haystack, needle)` as the `index` argument to `haystack.insert(index, needle)`&#x2014;however, using `insort` does both steps, and is faster.
 

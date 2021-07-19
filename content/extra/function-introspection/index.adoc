@@ -19,7 +19,7 @@ Contents:
 == Introduction to Function Introspection
 
 Python functions are full-fledged objects.
-As such, they have attributes, such as `+__doc__+`:
+As such, they have attributes like `+__doc__+`:
 
 [source, pycon]
 ----
@@ -60,15 +60,13 @@ Assigning arbitrary attributes to functions is not a very common practice in gen
 See, for example, the `short_description`, `boolean`, and `admin_order_field` attributes described in
 https://docs.djangoproject.com/en/stable/ref/contrib/admin#the-display-decorator[The Django admin site]
 documentation.
-In the Django docs, this example shows attaching a `short_description` to a method (among other attributes),
-to determine the description that will appear in record listings in the Django admin when that method is used:
+This example adapted from the Django docs shows attaching a `short_description` to a method of a `Model` subclass
+to determine the description that will appear in record listings in the Django admin UI when that method is used:
 
 [source, python]
 ----
     def is_published(self, obj):
         return obj.publish_date is not None
-    is_published.boolean = True
-    is_published.admin_order_field = '-publish_date'
     is_published.short_description = 'Is Published?'
 ----
 

@@ -1,7 +1,7 @@
 ---
 title: "A Beautiful Piece of Code: lis.py"
 date: 2021-06-17T17:52:48-03:00
-draft: false
+draft: true
 tags:
 - Lisp
 - interpreter
