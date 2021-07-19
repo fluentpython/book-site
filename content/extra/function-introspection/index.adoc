@@ -18,10 +18,15 @@ Contents:
 [[intro]]
 == Introduction to Function Introspection
 
-Function objects have many attributes beyond `__doc__`. See what the `dir` function reveals about our `factorial`:
+Function objects have many attributes beyond `+__doc__+`.
+See what the `dir` function reveals about `factorial`:
 
 [source, pycon]
 ----
+>>> def factorial(n):  <1>
+...     """returns n!"""
+...     return 1 if n < 2 else n * factorial(n - 1)
+...
 >>> dir(factorial)
 ['__annotations__', '__call__', '__class__', '__closure__', '__code__',
 '__defaults__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__',
@@ -33,10 +38,11 @@ Function objects have many attributes beyond `__doc__`. See what the `dir` funct
 >>>
 ----
 
-Most of these attributes are common to Python objects in general. In this section, we cover those that are especially relevant to treating functions as objects, starting with `__dict__`.
+Most of these attributes are common to Python objects in general.
+In this section, we cover those that are especially relevant to treating functions as objects, starting with `+__dict__+`.
 
 Like the instances of a plain user-defined class,
-a function uses the `__dict__` attribute to store user attributes assigned to it. This is useful as a primitive form of annotation.
+a function uses the `+__dict__+` attribute to store user attributes assigned to it. This is useful as a primitive form of annotation.
 Assigning arbitrary attributes to functions is not a very common practice in general, but Django is one framework that uses it.
 See, for example, the `short_description`, `boolean`, and `admin_order_field` attributes described in
 https://docs.djangoproject.com/en/stable/ref/contrib/admin#the-display-decorator[The Django admin site]
@@ -81,17 +87,17 @@ Computing the difference of two sets quickly gives us a list of the function-spe
 .Attributes of user-defined functions
 [options="header"]
 |===========================
-|Name             |Type            |Description
-|`__annotations__`|`dict`          |Parameter and return type hints
-|`__call__`       |`method-wrapper`|Implementation of the `()` operator; a.k.a. the callable object protocol
-|`__closure__`    |`tuple`         |The function closure, i.e., bindings for free variables (often is `None`)
-|`__code__`       |`code`          |Function metadata and function body compiled into bytecode
-|`__defaults__`   |`tuple`         |Default values for the formal parameters
-|`__get__`        |`method-wrapper`|Implementation of the read-only descriptor protocol (see <<attribute_descriptors>>)
-|`__globals__`    |`dict`          |Reference to global variables of the module where the function is defined
-|`__kwdefaults__` |`dict`          |Default values for the keyword-only formal parameters
-|`__name__`       |`str`           |The function name
-|`__qualname__`   |`str`           |The qualified function name, e.g., `Random.choice` (see https://www.python.org/dev/peps/pep-3155/[PEP-3155])
+|Name               |Type            |Description
+|`+__annotations__+`|`dict`          |Parameter and return type hints
+|`__call__`         |`method-wrapper`|Implementation of the `()` operator; a.k.a. the callable object protocol
+|`__closure__`      |`tuple`         |The function closure, i.e., bindings for free variables (often is `None`)
+|`__code__`         |`code`          |Function metadata and function body compiled into bytecode
+|`__defaults__`     |`tuple`         |Default values for the formal parameters
+|`__get__`          |`method-wrapper`|Implementation of the read-only descriptor protocol (see <<attribute_descriptors>>)
+|`__globals__`      |`dict`          |Reference to global variables of the module where the function is defined
+|`__kwdefaults__`   |`dict`          |Default values for the keyword-only formal parameters
+|`__name__`         |`str`           |The function name
+|`__qualname__`     |`str`           |The qualified function name, e.g., `Random.choice` (see https://www.python.org/dev/peps/pep-3155/[PEP-3155])
 |===========================
 
 [[parameters]]
@@ -168,10 +174,10 @@ Hello Jim!
 
 How does Bobo know which parameter names are required by the function, and whether they have default values or not?
 
-Within a function object, the `__defaults__` attribute holds a tuple with the
+Within a function object, the `+__defaults__+` attribute holds a tuple with the
 default values of positional and keyword arguments.
-The defaults for keyword-only arguments appear in `__kwdefaults__`.
-The names of the arguments, however, are found within the `__code__` attribute,
+The defaults for keyword-only arguments appear in `+__kwdefaults__+`.
+The names of the arguments, however, are found within the `+__code__+` attribute,
 which is a reference to a `code` object with many attributes of its own.
 
 To demonstrate the use of these attributes, we will inspect the function `clip` listed in <<ex_clip>>.
