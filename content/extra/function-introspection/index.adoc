@@ -295,6 +295,6 @@ Bobo is the kernel of Zope.
 I was very glad when Zope was released in late 1998 because I wanted to use Bobo in my software development gigs,
 but it was not easy to sell projects in Brazil using an obscure language named after a comedy troupe
 and an unknown framework with a name that is the Portuguese word for "fool".
-Zope was also unknown, but it least the name was neutral. And it included ZODB, which made it impressive.
+Zope was also unknown, but at least the name was neutral. And it included ZODB, which made it impressive.
 
 Jim has since rewritten Bobo from scratch to support WSGI and modern Python (including Python 3).
