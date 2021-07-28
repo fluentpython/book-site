@@ -11,6 +11,10 @@ tags:
 Unicode has always supported building accented characters by combining letters and diacritics.
 This idea has been extended to meet the growing demand for emojis.
 
+[[fig_emoji_families_top]]
+.Modern families.
+image::images/emoji_families.png[alt="Matrix of emoji families"]
+
 This post explains how to combine special markers and characters to make new pictographs.
 
 Contents:
