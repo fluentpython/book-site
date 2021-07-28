@@ -40,22 +40,25 @@ menu:
   nav:
     - name: Home
       url: /
-      weight: 1
+      weight: 10
     - name: Extra content
       url: /extra/
-      weight: 2
+      weight: 20
 #    - name: Soapbox
 #      url: /posts/
 #      weight: 2
+    - name: Python Lingo
+      url: /lingo/
+      weight: 30
     - name: Tags
       url: /tags/
-      weight: 3
+      weight: 40
     - name: About
       url: /about/
-      weight: 4
+      weight: 50
     - name: RSS
       url: /index.xml
-      weight: 5
+      weight: 60
 
 markup:
   defaultMarkdownHandler: goldmark
