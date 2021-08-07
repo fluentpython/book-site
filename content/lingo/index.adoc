@@ -196,7 +196,7 @@ python -m doctest module_with_tests.py
 
 [[N]]
 
-[[name_mangling]]name mangling:: (((name mangling)))The automatic renaming of private attributes from `+__x` to `_MyClass__x`, performed by the Python interpreter at runtime.
+[[name_mangling]]name mangling:: (((name mangling)))The automatic renaming of private attributes from `+__x+` to `+_MyClass__x`, performed by the Python interpreter at runtime.
 
 [[nonoverriding_descriptor]]nonoverriding descriptor:: ((("nonoverriding descriptors")))(((descriptors, nonoverriding)))A _descriptor_ that does not implement `+__set__+` and therefore does not interfere with setting of the _managed attribute_ in the _managed instance_. Consequently, if a namesake attribute is set in the _managed instance_, it will shadow the descriptor in that instance. Also called nondata descriptor or shadowable descriptor. Contrast with <<overriding descriptor>>.
 
