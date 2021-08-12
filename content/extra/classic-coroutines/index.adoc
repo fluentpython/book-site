@@ -84,7 +84,7 @@ except when I am contrasting them with native coroutines.
 ====
 
 [[story_of_this_post]]
-=== Story of This Post
+=== Story of this Post
 
 This is an updated version of chapter 16 of _Fluent Python, First Edition_.
 
@@ -95,8 +95,8 @@ context _classic coroutines_ are no longer supported—only _native coroutines_ 
 
 However, I still believe that deep understanding of _native coroutines_ and `await` depend
 on understanding the behavior and API of _classic coroutine_ objects and the precise meaning
-of `yield from`. https://www.python.org/dev/peps/pep-0492[_PEP 492_] introduced `async/await` syntax,
-and it states in section https://www.python.org/dev/peps/pep-0492/#await-expression[_Await expression_]:
+of `yield from`. https://www.python.org/dev/peps/pep-0492[PEP 492] introduced `async/await` syntax,
+and it states in section https://www.python.org/dev/peps/pep-0492/#await-expression[Await expression]:
 
 [quote]
 ____
