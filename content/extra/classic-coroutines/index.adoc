@@ -65,7 +65,7 @@ Although native coroutines evolved from classic coroutines, they don't replace t
 Classic coroutines have some useful behaviors that native coroutines can't emulate—and vice-versa,
 native coroutines have features that are missing in classic coroutines.
 
-Classic coroutines are the product of a series of enhancements to the simpler generator functions we've seen so far in the book.
+Classic coroutines are the product of a series of enhancements to generator functions.
 Following the evolution of coroutines in Python helps understand their features in stages of increasing functionality and complexity.
 
 After a brief overview of how generators were enhanced to act as coroutines, we jump to the core of the post. Then we'll see:
@@ -88,7 +88,7 @@ except when I am contrasting them with native coroutines.
 
 This is an updated version of chapter 16 of _Fluent Python, First Edition_.
 
-With the arrival of _native coroutines_ I decided to drop this chapter from the _Second Edition_,
+With the arrival of _native coroutines_ I decided to drop that chapter from the _Second Edition_,
 because it is a long and challenging study of a subject that is not as important as it used to be.
 _Coroutines_ are rarely used except for asynchronous programming, and in that
 context _classic coroutines_ are no longer supported—only _native coroutines_ are.
@@ -577,7 +577,7 @@ caller:: PEP 380 uses the term "caller" to refer to the client code that calls t
 PEP 380 often uses the word "iterator" to refer to the subgenerator. That's confusing because the delegating generator is also an iterator. So I prefer to use the term subgenerator, in line with the title of the PEP—“Syntax for Delegating to a Subgenerator.” However, the subgenerator can be a simple iterator implementing only `__next__`, and `yield from` can handle that too, although it was created to support generators implementing `__next__`, `send`, `close`, and `throw`.
 ====
 
-<<ex_coroaverager3>> provides more context to see `yield from` at work, and <<yield_channel_fig>> identifies the relevant parts of the example.footnote:[The picture in <<yield_channel_fig>> was inspired by a http://fluentpython.com/resources/yield-from.pdf[diagram] by Paul Sokolovsky.]
+<<ex_coroaverager3>> provides more context to see `yield from` at work, and <<yield_channel_fig>> identifies the relevant parts of the example.footnote:[The picture in <<yield_channel_fig>> was inspired by a https://www.fluentpython.com/extra/classic-coroutines/images/yield-from.pdf[diagram] by Paul Sokolovsky.]
 
 [[yield_channel_fig]]
 .While the delegating generator is suspended at yield from, the caller sends data directly to the subgenerator, which yields data back to the caller. The delegating generator resumes when the subgenerator returns and the interpreter raises StopIteration with the returned value attached.
@@ -653,7 +653,15 @@ Now let's review the formal description of the `yield from` construct, as presen
 
 [NOTE]
 ====
-This is one of the most challenging sections in the book. You may wonder whether it is worth your attention, given that most uses of `yield from` are in legacy asynchronous programming code, where it is now preferable to use `await` instead. But if you really want to understand how `async/wait` works under the hood, you need to understand `yield from`. The underlying machinery is the same. https://www.python.org/dev/peps/pep-0492/[PEP 492–Coroutines with async and await syntax] states that `await` "uses the `yield from` implementation with an extra step of validating its argument".footnote:[From PEP 492, section https://www.python.org/dev/peps/pep-0492/#await-expression[Await Expression]] PEP 492 also assumes understanding of PEP 380, and does not go into the same level of detail about the behavior of `yield from` or `await`.
+This used to be one of the most challenging sections in _Fluent Python_.
+You may wonder whether it is worth your attention,
+given that most uses of `yield from` are in legacy asynchronous programming code,
+where it is now preferable to use `await` instead.
+But if you really want to understand how `async/wait` works under the hood, you need to understand `yield from`.
+The underlying machinery is the same.
+https://www.python.org/dev/peps/pep-0492/[PEP 492–Coroutines with async and await syntax]
+states that `await` "uses the `yield from` implementation with an extra step of validating its argument".footnote:[From PEP 492, section https://www.python.org/dev/peps/pep-0492/#await-expression[Await Expression]]
+PEP 492 also assumes understanding of PEP 380, and does not go into the same level of detail about the behavior of `yield from` or `await`.
 ====
 
 While developing PEP 380, Greg Ewing--the PEP author--was questioned about the complexity of the proposed semantics. One of his answers was "For humans, almost all the important information is contained in one paragraph near the top." He then quoted part of the draft of PEP 380 which at the time read as follows:
@@ -1176,7 +1184,7 @@ David Beazley is the ultimate authority on Python generators and coroutines. The
 
 Coroutines allow new ways of organizing code, and just as recursion or polymorphism (dynamic dispatch), it takes some time getting used to their possibilities. An interesting example of classic algorithm rewritten with coroutines is in the post http://bit.ly/1HGsFQ0["Greedy algorithm with coroutines,"] by James Powell. You may also want to browse http://bit.ly/1HGsFzA["Popular recipes tagged _coroutine_"] in the ActiveState Code https://code.activestate.com/recipes/[recipes database].
 
-Paul Sokolovsky implemented `yield from` in Damien George's super lean http://micropython.org[MicroPython] interpreter designed to run on microcontrollers. As he studied the feature, he created a http://bit.ly/1JIqGxW[great, detailed diagram] to explain how `yield from` works, and shared it in the python-tulip mailing list. Sokolovsky was kind enough to allow me to copy the PDF to this book's site, where it has a http://fluentpython.com/resources/yield-from.pdf[more permanent URL].
+Paul Sokolovsky implemented `yield from` in Damien George's super lean http://micropython.org[MicroPython] interpreter designed to run on microcontrollers. As he studied the feature, he created a http://bit.ly/1JIqGxW[great, detailed diagram] to explain how `yield from` works, and shared it in the python-tulip mailing list. Sokolovsky was kind enough to allow me to copy the PDF to this book's site, where it has a https://www.fluentpython.com/content/extra/classic-coroutines/images/yield-from.pdf[more permanent URL].
 
 As I write this, the vast majority of uses of `yield from` to be found are in `asyncio` itself or code that uses it. I spent a lot of time looking for examples of `yield from` that did not depend on `asyncio`. Greg Ewing--who penned PEP 380 and implemented `yield from` in CPython--published http://bit.ly/1JIqJtu[a few examples] of its use: a `BinaryTree` class, a simple XML parser, and a task scheduler.
 
