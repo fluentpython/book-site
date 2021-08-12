@@ -19,7 +19,7 @@ Contents:
 * <<coro_return_sec>>
 * <<coro_yield_from_sec>>
 * <<yield_from_meaning_sec>>
-* <<taxi_sim_sec>>
+* <<sim_case_study>>
 * <<generic_classic_coroutine_types_sec>>
 * <<coroutines_summary>>
 * <<further_reading_coro_sec>>
@@ -234,7 +234,7 @@ Execution of the `simple_coro2` coroutine can be split in three phases, as shown
 
 [[simple_coro2_fig]]
 .Three phases in the execution of the simple_coro2 coroutine (note that each phase ends in a yield expression, and the next phase starts in the very same line, when the value of the yield expression is assigned to a variable)
-image::images/simple-coro.png[Simple coroutine code and diagram]
+image::images/simple-coro.png["Simple coroutine code and diagram"]
 
 Now let's consider a slightly more involved coroutine example.
 
@@ -568,7 +568,7 @@ PEP 380 often uses the word "iterator" to refer to the subgenerator. That's conf
 
 [[yield_channel_fig]]
 .While the delegating generator is suspended at yield from, the caller sends data directly to the subgenerator, which yields data back to the caller. The delegating generator resumes when the subgenerator returns and the interpreter raises StopIteration with the returned value attached.
-image::images/yield-channel.png[Yield channel diagram]
+image::images/yield-channel.png["Yield channel diagram"]
 
 The _coroaverager3.py_ script reads a `dict` with weights and heights from girls and boys in an imaginary seventh grade class. For example, the key `'boys;m'` maps to the heights of 9 boys, in meters; `'girls;kg'` are the weights of 10 girls in kilograms. The script feeds the data for each group into the `averager` coroutine we've seen before, and produces a report like this one:
 
@@ -780,7 +780,7 @@ Focusing on the details of the pseudocode expansion may not be helpful--dependin
 
 We'll now move on to a classic example of coroutine usage: programming simulations. This example does not showcase `yield from`, but it does reveal how coroutines are used to manage concurrent activities on a single thread.
 
-[[taxi_sim_sec]]
+[[sim_case_study]]
 === Use Case: Coroutines for Discrete Event Simulation
 
 [quote, Guido van Rossum and Phillip J. Eby, PEP 342—Coroutines via Enhanced Generators]
@@ -835,7 +835,7 @@ Other things to note about <<demo_taxi_sample_run_fig>>:
 
 [[demo_taxi_sample_run_fig]]
 .Sample run of taxi_sim.py with three taxis. The -s 3 argument sets the random generator seed so program runs can be reproduced for debugging and demonstration. Colored arrows highlight taxi trips.
-image::images/taxi-sim.png[Taxi simulation run with arrows]
+image::images/taxi-sim.png["Taxi simulation run with arrows"]
 
 The simulation may also end with pending events. When that happens, the final message reads like this:
 
