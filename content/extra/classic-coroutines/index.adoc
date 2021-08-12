@@ -8,6 +8,22 @@ tags:
 - simulation
 ---
 
+Contents:
+
+* <<intro>>
+* <<how_coro_evolved>>
+* <<coro_basic_sec>>
+* <<running_average>>
+* <<priming_decorator_sec>>
+* <<coro_termination_sec>>
+* <<coro_return_sec>>
+* <<coro_yield_from_sec>>
+* <<yield_from_meaning_sec>>
+* <<taxi_sim_sec>>
+* <<generic_classic_coroutine_types_sec>>
+* <<coroutines_summary>>
+* <<further_reading_coro_sec>>
+
 
 [[intro]]
 == Coroutine Flavors
@@ -43,7 +59,7 @@ native coroutines::
 
 Native coroutines and generator-based coroutines are intended specifically for asynchronous I/O programming. As such, we'll get back to them in <<async_ch>>—Basic Asyncio.
 
-This chapter is about _classic coroutines_.
+This post is about _classic coroutines_.
 Although native coroutines evolved from classic coroutines, they don't replace them completely.
 Classic coroutines have some useful behaviors that native coroutines can't emulate—and vice-versa,
 native coroutines have features that are missing in classic coroutines.
@@ -51,7 +67,7 @@ native coroutines have features that are missing in classic coroutines.
 Classic coroutines are the product of a series of enhancements to the simpler generator functions we've seen so far in the book.
 Following the evolution of coroutines in Python helps understand their features in stages of increasing functionality and complexity.
 
-After a brief overview of how generators were enhanced to act as coroutines, we jump to the core of the chapter. Then we'll see:
+After a brief overview of how generators were enhanced to act as coroutines, we jump to the core of the post. Then we'll see:
 
 * The behavior and states of a generator operating as a coroutine.
 * Priming a coroutine automatically with a decorator.
@@ -62,20 +78,21 @@ After a brief overview of how generators were enhanced to act as coroutines, we 
 
 [NOTE]
 ====
-In this chapter I often use the word "coroutine" to refer to classic coroutines—a.k.a. generator-based coroutines—
+In this post I often use the word "coroutine" to refer to classic coroutines—a.k.a. generator-based coroutines—
 except when I am contrasting them with native coroutines.
 ====
 
-=== What's new in this chapter
+=== Story of This Post
 
-Since 2012 when `yield from` was implemented in Python 3.3,
-classic coroutines did not undergo major changes. Native coroutines—created with `async def`—are similar,
-but not a full replacement of classic coroutines. They are covered in <<async_ch>>.
+This is an updated version of chapter 16 of _Fluent Python, First Edition_.
+With the arrival of _native coroutines_ I decided to drop this chapter from the _Second Edition_,
+because it is a long and challenging study of a subject that is not as important as it used to be.
 
-Therefore, this chapter has no significant changes except for the occasional comparisons of
-classic versus native coroutines, as well as `yield from` versus `await`.
+However, I still believe that deep understing of _native coroutines_ and `await` depend
+on knowing how _classic coroutines_ and `yield from` work.
+That's why this text still deserves the attention of motivated and curious Pythonistas.
 
-
+[[how_coro_evolved]]
 === How Coroutines Evolved from Generators
 
 A classic coroutine is syntactically like a generator: just a function with the `yield` keyword in its body.
@@ -221,7 +238,7 @@ image::images/simple-coro.png[Simple coroutine code and diagram]
 
 Now let's consider a slightly more involved coroutine example.
 
-
+[[running_average]]
 === Example: Coroutine to Compute a Running Average
 
 While discussing closures in <<closures_and_decorators>>, we studied objects to compute a running average: <<ex_average_oo>> shows a plain class and <<ex_average_fixed>> presents a higher-order function producing a closure to keep the `total` and `count` variables across invocations. <<ex_coroaverager>> shows how to do the same with a coroutine.footnote:[This example is inspired by a snippet from Jacob Holm in the Python-ideas list, message titled http://bit.ly/1MMc9zy["Yield-From: Finalization guarantees."] Some variations appear later in the thread, and Holm further explains his thinking in http://bit.ly/1MMcano[message 003912].]
@@ -763,7 +780,7 @@ Focusing on the details of the pseudocode expansion may not be helpful--dependin
 
 We'll now move on to a classic example of coroutine usage: programming simulations. This example does not showcase `yield from`, but it does reveal how coroutines are used to manage concurrent activities on a single thread.
 
-
+[[taxi_sim_sec]]
 === Use Case: Coroutines for Discrete Event Simulation
 
 [quote, Guido van Rossum and Phillip J. Eby, PEP 342—Coroutines via Enhanced Generators]
@@ -827,7 +844,7 @@ The simulation may also end with pending events. When that happens, the final me
 *** end of simulation time: 3 events pending ***
 ----
 
-The full listing of _taxi_sim.py_ is at <<support_taxi_sim>>. In this chapter, we'll show only the parts that are relevant to our study of coroutines. The really important functions are only two: `taxi_process` (a coroutine), and the `Simulator.run` method where the main loop of the simulation is executed.
+The full listing of _taxi_sim.py_ is at <<support_taxi_sim>>. In this post, we'll show only the parts that are relevant to our study of coroutines. The really important functions are only two: `taxi_process` (a coroutine), and the `Simulator.run` method where the main loop of the simulation is executed.
 
 <<ex_taxi_process>> shows the code for `taxi_process`. This coroutine uses two objects defined elsewhere: the `compute_delay` function, which returns a time interval in minutes, and the `Event` class, a named tuple defined like this:
 
@@ -1004,7 +1021,7 @@ I believe the code in `Simulator.run` would be a bit harder to read without thos
 
 The point of this example was to show a main loop processing events and driving coroutines by sending data to them. This is the basic idea behind `asyncio`, which we'll study in <<async_ch>>.
 
-Before closing the chapter, let's discuss generic coroutine types.
+To wrap up, let's discuss generic coroutine types.
 
 [NOTE]
 ====
@@ -1106,12 +1123,11 @@ Generator[Any, float, Any] <: Generator[Any, int, Any]
 
 This is an example of the second _Variance Rule of Thumb_.
 
-With this merry discussion of variance, we are ready to wrap
-this chapter—one of the hardest in the book.
+With this merry discussion of variance, we summarize what we saw in this post.
 
 
-[[coroutines_chapter_summary]]
-=== Chapter Summary
+[[coroutines_summary]]
+=== Summary
 
 Guido van Rossum wrote there were three different styles of code you could write using generators:
 
@@ -1121,11 +1137,9 @@ There's the traditional "pull" style (iterators), "push" style (like the averagi
 yet?...).footnote:[Message to thread http://bit.ly/1JIqjn6["Yield-From: Finalization guarantees"] in the Python-ideas mailing list. The David Beazley tutorial Guido refers to is http://www.dabeaz.com/coroutines/["A Curious Course on Coroutines and Concurrency"].]
 ____
 
-<<iterables2generators>> was devoted to iterators;
-this chapter introduced classic coroutines used in "push style"
+This post introduced classic coroutines used in "push style"
 and also as very simple "tasks”—the taxi processes in the simulation example.
-<<async_ch>> will be about native coroutines and asynchronous generators,
-which evolved from the generators and classic coroutines as described here.
+Native coroutines evolved from the classic coroutines as described here.
 
 The running average example demonstrated a common use for a classic coroutine:
 as an accumulator processing items sent to it.
@@ -1139,7 +1153,7 @@ Accumulator coroutines can yield back partial results with each `send` method ca
 
 The coverage of `yield from` started with trivial examples using simple iterables, then moved to an example highlighting the three main components of any significant use of `yield from`: the delegating generator (defined by the use of `yield from` in its body), the subgenerator activated by `yield from`, and the client code that actually drives the whole setup by sending values to the subgenerator through the pass-through channel established by `yield from` in the delegating generator. This section was wrapped up with a look at the formal definition of `yield from` behavior as described in PEP 380 using English and Python-like pseudocode.
 
-We closed the chapter with the discrete event simulation example, showing how generators can be used as an alternative to threads and callbacks to support concurrency. Although simple, the taxi simulation gives a first glimpse at how event-driven frameworks like Tornado and `asyncio` use a main loop to drive coroutines executing concurrent activities with a single thread of execution. In event-oriented programming with coroutines, each concurrent activity is carried out by a coroutine that repeatedly yields control back to the main loop, allowing other coroutines to be activated and move forward. This is a form of cooperative multitasking: coroutines voluntarily and explicitly yield control to the central scheduler. In contrast, threads implement preemptive multitasking. The scheduler can suspend threads at any time--even halfway through a statement--to give way to other threads.
+The discrete event simulation example showed how generators can be used as an alternative to threads and callbacks to support concurrency. Although simple, the taxi simulation gives a first glimpse at how event-driven frameworks like Tornado and `asyncio` use a main loop to drive coroutines executing concurrent activities with a single thread of execution. In event-oriented programming with coroutines, each concurrent activity is carried out by a coroutine that repeatedly yields control back to the main loop, allowing other coroutines to be activated and move forward. This is a form of cooperative multitasking: coroutines voluntarily and explicitly yield control to the central scheduler. In contrast, threads implement preemptive multitasking. The scheduler can suspend threads at any time--even halfway through a statement--to give way to other threads.
 
 
 [[further_reading_coro_sec]]
