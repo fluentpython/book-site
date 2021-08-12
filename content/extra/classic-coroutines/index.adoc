@@ -11,6 +11,7 @@ tags:
 Contents:
 
 * <<intro>>
+* <<story_of_this_post>>
 * <<how_coro_evolved>>
 * <<coro_basic_sec>>
 * <<running_average>>
@@ -82,14 +83,26 @@ In this post I often use the word "coroutine" to refer to classic coroutines—a
 except when I am contrasting them with native coroutines.
 ====
 
+[[story_of_this_post]]
 === Story of This Post
 
 This is an updated version of chapter 16 of _Fluent Python, First Edition_.
+
 With the arrival of _native coroutines_ I decided to drop this chapter from the _Second Edition_,
 because it is a long and challenging study of a subject that is not as important as it used to be.
+_Coroutines_ are rarely used except for asynchronous programming, and in that
+context _classic coroutines_ are no longer supported—only _native coroutines_ are.
 
-However, I still believe that deep understing of _native coroutines_ and `await` depend
-on knowing how _classic coroutines_ and `yield from` work.
+However, I still believe that deep understanding of _native coroutines_ and `await` depend
+on understanding the behavior and API of _classic coroutine_ objects and the precise meaning
+of `yield from`. https://www.python.org/dev/peps/pep-0492[_PEP 492_] introduced `async/await` syntax,
+and it states in section https://www.python.org/dev/peps/pep-0492/#await-expression[_Await expression_]:
+
+[quote]
+____
+It (`await`) uses the `yield from` implementation with an extra step of validating its argument.
+____
+
 That's why this text still deserves the attention of motivated and curious Pythonistas.
 
 [[how_coro_evolved]]
