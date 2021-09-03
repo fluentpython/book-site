@@ -58,9 +58,9 @@ generator-based coroutines::
 native coroutines::
     A coroutine defined with `async def`. You can delegate from a native coroutine to another native coroutine or to a generator-based coroutine using the `await` keyword, similar to how classic coroutines use `yield from`.
 
-Native coroutines and generator-based coroutines are intended specifically for asynchronous I/O programming. As such, we'll get back to them in <<async_ch>>—Basic Asyncio.
-
+Native coroutines and generator-based coroutines are intended specifically for asynchronous I/O programming.
 This post is about _classic coroutines_.
+
 Although native coroutines evolved from classic coroutines, they don't replace them completely.
 Classic coroutines have some useful behaviors that native coroutines can't emulate—and vice-versa,
 native coroutines have features that are missing in classic coroutines.
