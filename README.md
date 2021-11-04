@@ -18,3 +18,8 @@ The source code for examples in the book is in a different repository: [fluentpy
 * [Get Hugo to render (nice) Asciidocs](https://blog.anoff.io/2019-02-17-hugo-render-asciidoc/) (2019): a few hacks.
 * [AsciiDoc support for Hugo on Netlify](https://patrickpeeters.com/2019/09/asciidoc-support-for-hugo-on-netlify/) (2019)
 * [Provide asciidoc/asciidoctor on the builder nodes](https://answers.netlify.com/t/provide-asciidoc-asciidoctor-on-the-builder-nodes/12133) (2020)
+
+
+## License
+
+ <p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><a property="dct:title" rel="cc:attributionURL" href="http://fluentpython.com">Fluent Python Companinion Site</a> by <a rel="cc:attributionURL dct:creator" property="cc:attributionName" href="https://twitter.com/ramalhoorg">Luciano Ramalho</a> is licensed under <a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">Attribution-ShareAlike 4.0 International<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a></p> 
