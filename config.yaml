@@ -92,7 +92,7 @@ markup:
     startLevel: 2
   # AsciiDoc
   asciidocExt:
-    attributes: {}
+    attributes: { xrefstyle: short, figure-caption: Figure }
     backend: html5
     extensions: []
     failureLevel: fatal
@@ -103,3 +103,26 @@ markup:
     trace: false
     verbose: false
     workingFolderCurrent: false
+
+# I had to add this in order to get my version of hugo to run with 
+# asciidoctor
+#
+security:
+  enableInlineShortcodes: false
+  exec:
+    allow:
+    - ^dart-sass-embedded$
+    - ^go$
+    - ^npx$
+    - ^postcss$
+    - ^asciidoctor$
+    osEnv:
+    - (?i)^(PATH|PATHEXT|APPDATA|TMP|TEMP|TERM)$
+  funcs:
+    getenv:
+    - ^HUGO_
+  http:
+    methods:
+    - (?i)GET|POST
+    urls:
+    - .*  
