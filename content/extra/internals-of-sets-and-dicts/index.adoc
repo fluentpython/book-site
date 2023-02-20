@@ -10,7 +10,9 @@ tags:
 - chapter 3
 ---
 
-Understand how Python dictionaries and sets are built with hash tables to make sense of their strengths and limitations.
+Python's `dict` and `set` are built on top of hash tables. 
+This post explains how the use of hash tables results in
+the strengths and limitations of those container types.
 
 Here are some questions this article answers:
 
