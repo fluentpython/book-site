@@ -2,10 +2,12 @@
 title: "Classic Coroutines"
 date: 2021-08-11T22:50:00-03:00
 draft: false
+weight: 170
 tags:
 - coroutine
 - yield-from
 - simulation
+- chapter 17
 ---
 
 Contents:

@@ -41,7 +41,7 @@ menu:
     - name: Home
       url: /
       weight: 10
-    - name: Extra content
+    - name: Extra Content
       url: /extra/
       weight: 20
 #    - name: Soapbox

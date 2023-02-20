@@ -2,10 +2,12 @@
 title: "Building Multi-Character Emojis"
 date: 2021-07-03T18:57:00-03:00
 draft: false
+weight: 40
 tags:
 - Unicode
 - emoji
 - high-level
+- chapter 4
 ---
 
 Unicode has always supported building accented characters by combining letters and diacritics.

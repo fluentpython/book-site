@@ -2,10 +2,12 @@
 title: "Internals of sets and dicts"
 date: 2021-06-24T19:19:18-03:00
 draft: false
+weight: 30
 tags:
 - dict
 - set
 - hash table
+- chapter 3
 ---
 
 Understand how Python dictionaries and sets are built with hash tables to make sense of their strengths and limitations.
