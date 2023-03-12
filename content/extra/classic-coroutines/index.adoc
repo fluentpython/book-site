@@ -576,7 +576,7 @@ caller:: PEP 380 uses the term "caller" to refer to the client code that calls t
 
 [TIP]
 ====
-PEP 380 often uses the word "iterator" to refer to the subgenerator. That's confusing because the delegating generator is also an iterator. So I prefer to use the term subgenerator, in line with the title of the PEP—“Syntax for Delegating to a Subgenerator.” However, the subgenerator can be a simple iterator implementing only `__next__`, and `yield from` can handle that too, although it was created to support generators implementing `__next__`, `send`, `close`, and `throw`.
+PEP 380 often uses the word "iterator" to refer to the subgenerator. That's confusing because the delegating generator is also an iterator. So I prefer to use the term subgenerator, in line with the title of the PEP—“Syntax for Delegating to a Subgenerator.” However, the subgenerator can be a simple iterator implementing only `+__next__+`, and `yield from` can handle that too, although it was created to support generators implementing `+__next__+`, `send`, `close`, and `throw`.
 ====
 
 <<ex_coroaverager3>> provides more context to see `yield from` at work, and <<yield_channel_fig>> identifies the relevant parts of the example.footnote:[The picture in <<yield_channel_fig>> was inspired by a https://www.fluentpython.com/extra/classic-coroutines/images/yield-from.pdf[diagram] by Paul Sokolovsky.]
