@@ -276,7 +276,7 @@ python -m doctest module_with_tests.py
 
 [[W]]
 
-[[warlus_operator]]warlus operator:: (((walrus operator)))Semi-official name for the ++:=++ operator, formally described in https://www.python.org/dev/peps/pep-0572/[PEP 572—Assignment Expressions]. Turn your head 90° to the left and think of a https://en.wikipedia.org/wiki/Walrus#/media/File:Walrus2.jpg[walrus] to understand why.
+[[warlus_operator]]walrus operator:: (((walrus operator)))Semi-official name for the ++:=++ operator, formally described in https://www.python.org/dev/peps/pep-0572/[PEP 572—Assignment Expressions]. Turn your head 90° to the left and think of a https://en.wikipedia.org/wiki/Walrus#/media/File:Walrus2.jpg[walrus] to understand why.
 
 [[wart]]wart:: ((("warts, definition of term")))A misfeature of the language. Andrew Kuchling's famous post http://web.archive.org/web/20031002184114/www.amk.ca/python/writing/warts.html[Python warts] has been acknowledged by the <<BDFL>> as influential in the decision to break backward-compatibility in the design of Python 3, as most of the failings could not be fixed otherwise. Many of Kuchling's issues were fixed in Python 3. See https://wiki.python.org/moin/PythonWarts[Python Warts] in https://wiki.python.org[wiki.python.org].
 
