@@ -1,11 +1,12 @@
 ---
-title: "Weak References"
-date: 2021-07-06T21:16:42-03:00
-weight: 60
+title: "Referências Fracas"
+date: 2023-07-05T16:25:00-03:00
+weight: 62
 draft: false
 tags:
 - standard library
 - chapter 6
+- em português
 ---
 
 === Introduction
